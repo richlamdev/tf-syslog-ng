@@ -225,8 +225,18 @@ output "public_hostname" {
 resource "local_file" inventory {
   filename = "./inventory"
   content = <<EOF
+  [aws]
   ${aws_instance.public_test_instance[0].public_dns}
   ${aws_instance.public_test_instance[1].public_dns}
+
+  [multi:children]
+  aws
+
+  [multi:vars]
+  ansible_become=True
+  ansible_become_method=sudo
+  ansible_become_user=root
+  ansible_python_interpreter=/usr/bin/python3
   EOF
 }
 ########################### OUTPUT INVENTORY FOR ANSIBLE #########

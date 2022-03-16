@@ -1,0 +1,11 @@
+--- # install python3 to enable all features of ansible
+
+- name: Check if Python3 is installed
+  raw: python3 --version
+  register: python_exist
+  failed_when: False
+  changed_when: False
+
+- name: Ensure Python3 is installed
+  raw: 'sudo yum install python3 -y'
+  when: python_exist.rc != 0
