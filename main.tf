@@ -176,6 +176,29 @@ resource "aws_security_group" "sg_icmp" {
     Name = "private_sg_icmp_from_public_or_private_subnet"
   }
 }
+
+
+resource "aws_security_group" "allow_syslog_ng" {
+  name        = "allow_syslog_ng"
+  description = "allow syslog-ng UDP 514 ingress from public or private subnet"
+  vpc_id      = aws_vpc.vpc.id
+  ingress {
+    from_port   = 514
+    to_port     = 514
+    protocol    = "udp"
+    cidr_blocks = ["10.0.0.0/20"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "allow_syslog_ng_from_public_or_private_subnet"
+  }
+}
+
 ########################### SECURITY GROUPS ######################
 
 ########################### EC2 INSTANCES ########################
