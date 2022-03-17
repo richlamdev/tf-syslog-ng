@@ -1,6 +1,6 @@
 ---
 - name: Playbook desktop start
-  hosts: all
+  #hosts: all
   become: True
   become_user: root
   become_method: sudo
@@ -10,6 +10,11 @@
   #tasks:
   #- include_tasks: tasks/main.yml
 
+  hosts: syslogng
+  roles:
+    - role: syslog-ng
+
+  hosts: all
   roles:
     - role: bootstrap
     - role: repo-epel

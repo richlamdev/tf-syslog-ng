@@ -1,0 +1,17 @@
+---
+- name: "Playbook to test the inventory_hostname and ansible_hostname"
+  hosts: all
+  gather_facts: True
+  tasks:
+
+   - name: What is my inventory_hostname
+     debug:
+       msg: "{{ inventory_hostname }}"
+
+   - name: What is my group_names
+     debug:
+       msg: "{{ group_names }}"
+
+   - name: What is my ansible_hostname
+     debug:
+       msg: "{{ ansible_hostname }}"

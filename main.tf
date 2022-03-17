@@ -209,7 +209,7 @@ resource "aws_key_pair" "richy-ssh-key" {
 
 # public instance
 resource "aws_instance" "public_test_instance" {
-  count           = 2
+  count           = 4
   ami             = "ami-0b28dfc7adc325ef4"
   subnet_id       = aws_subnet.public.id
   security_groups = [aws_security_group.sg_public.id, aws_security_group.sg_icmp.id, aws_security_group.allow_syslog_ng.id]
@@ -256,18 +256,26 @@ output "Public_IPv4_DNS" {
 resource "local_file" inventory {
   filename = "./inventory"
   content = <<EOF
-  [aws]
-  ${aws_instance.public_test_instance[0].public_dns}
-  ${aws_instance.public_test_instance[1].public_dns}
+[syslogng]
+${aws_instance.public_test_instance[0].public_dns}
+${aws_instance.public_test_instance[1].public_dns}
 
-  [multi:children]
-  aws
+[dns]
+${aws_instance.public_test_instance[2].public_dns}
 
-  [multi:vars]
-  ansible_become=True
-  ansible_become_method=sudo
-  ansible_become_user=root
-  ansible_python_interpreter=/usr/bin/python3
-  EOF
+[client]
+${aws_instance.public_test_instance[3].public_dns}
+
+[multi:children]
+syslogng
+dns
+client
+
+[multi:vars]
+ansible_become=True
+ansible_become_method=sudo
+ansible_become_user=root
+ansible_python_interpreter=/usr/bin/python3
+EOF
 }
 ########################### OUTPUT INVENTORY FOR ANSIBLE #########
