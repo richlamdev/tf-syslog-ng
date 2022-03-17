@@ -5,6 +5,7 @@
     name:
       - bind-utils
       - nc
+      - nmap
       - syslog-ng
       - tcpdump
       - tmux
