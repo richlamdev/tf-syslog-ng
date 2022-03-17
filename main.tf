@@ -235,20 +235,44 @@ resource "aws_instance" "private_test_instance" {
   }
 }
 
-output "Private_IPv4_addresses_public_instance" {
-  value = aws_instance.public_test_instance.*.private_ip
+output "Private_IPv4_addresses_public_instance_syslog_ng_0" {
+  value = aws_instance.public_test_instance[0].private_ip
+  description = "Syslog NG 0 private IP"
 }
 
-output "Private_IP_DNS_name_public_instance" {
-  value = aws_instance.public_test_instance.*.private_dns
+output "Private_IPv4_addresses_public_instance_syslog_ng_1" {
+  value = aws_instance.public_test_instance[1].private_ip
+  description = "Syslog NG 1 private IP"
 }
 
-output "Public_IPv4_addresses" {
-  value = aws_instance.public_test_instance.*.public_ip
+output "Private_IPv4_addresses_public_instance_dns_server" {
+  value = aws_instance.public_test_instance[2].private_ip
+  description = "DNS server private IP"
 }
 
-output "Public_IPv4_DNS" {
-  value = aws_instance.public_test_instance.*.public_dns
+output "Private_IPv4_addresses_public_instance_client" {
+  value = aws_instance.public_test_instance[3].private_ip
+  description = "client private IP"
+}
+
+#output "Public_IPv4_addresses" {
+  #value = aws_instance.public_test_instance.*.public_ip
+#}
+
+output "Public_IPv4_DNS_syslog_ng_0" {
+  value = aws_instance.public_test_instance[0].public_dns
+}
+
+output "Public_IPv4_DNS_syslog_ng_1" {
+  value = aws_instance.public_test_instance[1].public_dns
+}
+
+output "Public_IPv4_DNS_dns_server" {
+  value = aws_instance.public_test_instance[2].public_dns
+}
+
+output "Public_IPv4_DNS_client" {
+  value = aws_instance.public_test_instance[3].public_dns
 }
 ########################### EC2 INSTANCES ########################
 
