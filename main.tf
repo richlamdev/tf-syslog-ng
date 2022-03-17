@@ -212,11 +212,19 @@ resource "aws_instance" "private_test_instance" {
   }
 }
 
-output "instance_ips" {
+output "Private_IPv4_addresses_public_instance" {
+  value = aws_instance.public_test_instance.*.private_ip
+}
+
+output "Private_IP_DNS_name_public_instance" {
+  value = aws_instance.public_test_instance.*.private_dns
+}
+
+output "Public_IPv4_addresses" {
   value = aws_instance.public_test_instance.*.public_ip
 }
 
-output "public_hostname" {
+output "Public_IPv4_DNS" {
   value = aws_instance.public_test_instance.*.public_dns
 }
 ########################### EC2 INSTANCES ########################
