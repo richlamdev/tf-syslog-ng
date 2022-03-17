@@ -1,5 +1,5 @@
 ---
-- name: Install base packages
+- name: Install misc packages
   dnf:
     state: latest
     name:
@@ -9,3 +9,19 @@
       - tcpdump
       - tmux
       - vim
+
+- name: Enable syslog-ng
+  systemd:
+    name: syslog-ng
+    enabled: True
+    state: restarted
+
+- name: Disable rsyslog
+  systemd:
+    name: rsyslog
+    enabled: False
+    state: stopped
+
+#- name: Force systemd to reread configs
+  #systemd:
+    #daemon_reload: True
