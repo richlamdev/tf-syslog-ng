@@ -1,0 +1,11 @@
+---
+- name: Install base packages
+  dnf:
+    state: latest
+    name:
+      - bind-utils
+      - nc
+      - syslog-ng
+      - tcpdump
+      - tmux
+      - vim

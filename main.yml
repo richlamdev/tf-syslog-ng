@@ -11,5 +11,6 @@
   #- include_tasks: tasks/main.yml
 
   roles:
-    - role: base
-    - role: syslog-ng
+    - role: bootstrap
+    - role: repo-epel
+    - role: packages
