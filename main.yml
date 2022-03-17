@@ -4,7 +4,7 @@
   become: True
   become_user: root
   become_method: sudo
-  gather_facts: False
+  gather_facts: True
   #vars:
     #ansible_python_interpreter: /usr/local/bin/python3
   #tasks:
@@ -12,3 +12,4 @@
 
   roles:
     - role: base
+    - role: syslog-ng
