@@ -156,15 +156,15 @@ resource "aws_security_group" "sg_private" {
 }
 
 
-resource "aws_security_group" "sg_private_icmp" {
-  name        = "sg_private_icmp"
-  description = "allow icmp from public subnet"
+resource "aws_security_group" "sg_icmp" {
+  name        = "sg_icmp"
+  description = "allow icmp from public or private subnet"
   vpc_id      = aws_vpc.vpc.id
   ingress {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
-    cidr_blocks = ["10.0.1.0/24"]
+    cidr_blocks = ["10.0.0.0/20"]
   }
   egress {
     from_port   = 0
@@ -173,7 +173,7 @@ resource "aws_security_group" "sg_private_icmp" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "private_sg_icmp_only_from_public_subnet"
+    Name = "private_sg_icmp_from_public_or_private_subnet"
   }
 }
 ########################### SECURITY GROUPS ######################
@@ -189,7 +189,7 @@ resource "aws_instance" "public_test_instance" {
   count           = 2
   ami             = "ami-0b28dfc7adc325ef4"
   subnet_id       = aws_subnet.public.id
-  security_groups = [aws_security_group.sg_public.id]
+  security_groups = [aws_security_group.sg_public.id, aws_security_group.sg_icmp.id]
   instance_type   = "t3.micro"
   #iam_instance_profile = "EC2SSMRole"
   key_name = "richy-ssh-key"
@@ -202,7 +202,7 @@ resource "aws_instance" "public_test_instance" {
 resource "aws_instance" "private_test_instance" {
   ami             = "ami-0b28dfc7adc325ef4"
   subnet_id       = aws_subnet.private.id
-  security_groups = [aws_security_group.sg_private.id]
+  security_groups = [aws_security_group.sg_private.id, aws_security_group.sg_icmp.id]
   instance_type   = "t3.micro"
   count           = 1
   #iam_instance_profile = "EC2SSMRole"
