@@ -16,6 +16,7 @@
     - role: env
     - role: repo-epel
     - role: packages
+    - role: selinux
     - role: vim
 
     - role: syslog-ng
