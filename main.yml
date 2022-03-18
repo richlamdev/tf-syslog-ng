@@ -13,7 +13,10 @@
   hosts: all
   roles:
     - role: bootstrap
+    - role: env
     - role: repo-epel
     - role: packages
+    - role: vim
+
     - role: syslog-ng
       when: inventory_hostname in groups ['syslogng']
