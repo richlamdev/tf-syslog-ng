@@ -15,3 +15,7 @@
    - name: What is my ansible_hostname
      debug:
        msg: "{{ ansible_hostname }}"
+
+   - name: What is my ansible_user
+     debug:
+       msg: "{{ ansible_user }}"
