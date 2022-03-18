@@ -4,6 +4,8 @@
     state: latest
     name:
       - bind-utils
+      - hping3
+      - lsof
       - nc
       - nmap
       - tcpdump
