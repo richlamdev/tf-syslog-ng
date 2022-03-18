@@ -5,6 +5,20 @@
     name:
       - syslog-ng
 
+- name: Update syslog-ng.conf to enable default TCP and UDP logging on port 514
+  blockinfile:
+    path: /etc/syslog-ng/syslog-ng.conf
+    block: |
+      source s_net {
+               tcp(ip(0.0.0.0) port(514));
+               udp(ip(0.0.0.0) port(514));
+      };
+
+      destination d_fromnet {file("/var/log/fromnet");};
+      log {source(s_net); destination(d_fromnet);};
+    create: True
+    backup: True
+
 - name: Enable syslog-ng
   systemd:
     name: syslog-ng
