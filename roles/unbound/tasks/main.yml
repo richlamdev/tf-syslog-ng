@@ -1,0 +1,12 @@
+---
+- name: Install unbound package
+  dnf:
+    state: latest
+    name:
+      - unbound
+
+- name: Enable and always restart unbound
+  systemd:
+    name: unbound
+    enabled: True
+    state: restarted

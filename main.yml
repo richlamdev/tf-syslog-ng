@@ -21,3 +21,6 @@
 
     - role: syslog-ng
       when: inventory_hostname in groups ['syslogng']
+
+    - role: unbound
+      when: inventory_hostname in groups ['dns']
