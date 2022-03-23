@@ -199,6 +199,28 @@ resource "aws_security_group" "allow_syslog_ng" {
   }
 }
 
+
+resource "aws_security_group" "allow_dns" {
+  name        = "allow_dns"
+  description = "allow dns UDP 53 ingress from public or private subnet"
+  vpc_id      = aws_vpc.vpc.id
+  ingress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = ["10.0.0.0/20"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "allow_dns_from_public_or_private_subnet"
+  }
+}
+
 ########################### SECURITY GROUPS ######################
 
 ########################### EC2 INSTANCES ########################

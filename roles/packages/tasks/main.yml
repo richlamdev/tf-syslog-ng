@@ -4,6 +4,7 @@
     state: latest
     name:
       - bind-utils
+      - git
       - hping3
       - lsof
       - nc

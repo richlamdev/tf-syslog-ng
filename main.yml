@@ -24,3 +24,6 @@
 
     - role: unbound
       when: inventory_hostname in groups ['dns']
+
+    - role: client
+      when: inventory_hostname in groups ['client']
