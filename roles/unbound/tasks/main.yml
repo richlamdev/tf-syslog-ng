@@ -5,6 +5,22 @@
     name:
       - unbound
 
+- name: copy over unbound configuration
+  copy:
+    src: unbound.conf
+    dest: "/etc/unbound/unbound.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: copy over localdns.conf
+  copy:
+    src: localdns.conf
+    dest: "/etc/unbound/localdns.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Enable and always restart unbound
   systemd:
     name: unbound
