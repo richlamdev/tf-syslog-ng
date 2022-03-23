@@ -19,6 +19,14 @@
     create: True
     backup: True
 
+- name: copy over hosts lookup file
+  copy:
+    src: hosts_lookup.txt
+    dest: "/etc/syslog-ng/hosts_lookup.txt"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Enable syslog-ng
   systemd:
     name: syslog-ng
