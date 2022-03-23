@@ -1,7 +1,9 @@
 # tf-syslog-ng
 Terraform AWS syslog-ng testing
 
-This was created in a hurry for some basic testing.
+The Terraform was created in a hurry for some basic testing.
+
+Ansible is a work in progress for syslog/DNS testing.
 
 NOTES:
 
