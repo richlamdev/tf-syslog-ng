@@ -325,3 +325,16 @@ ansible_python_interpreter=/usr/bin/python3
 EOF
 }
 ########################### OUTPUT INVENTORY FOR ANSIBLE #########
+
+########################### HOSTS FILE FOR EACH INSTANCE #########
+resource "local_file" hosts_append {
+  filename = "./hosts/hosts_append"
+  content = <<EOF
+
+${aws_instance.public_test_instance[0].private_ip}     syslog-0
+${aws_instance.public_test_instance[1].private_ip}     syslog-1
+${aws_instance.public_test_instance[2].private_ip}     dns-server
+${aws_instance.public_test_instance[3].private_ip}     client
+
+EOF
+}

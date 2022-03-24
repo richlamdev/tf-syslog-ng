@@ -10,3 +10,16 @@
     repo: "https://github.com/richlamdev/syslog-generator-1.git"
     dest: "/home/{{ local_username }}/git/syslog-generator-1/"
     update: no
+
+- name: Change hostname to client (for client ec2 instance)
+  hostname:
+    name: client
+
+- name: copy over hosts_append file
+  assemble:
+    src: "{{ playbook_dir }}/hosts"
+    dest: "/etc/hosts"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: False

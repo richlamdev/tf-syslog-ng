@@ -4,18 +4,22 @@
   gather_facts: True
   tasks:
 
-   - name: What is my inventory_hostname
+   - name: inventory_hostname
      debug:
        msg: "{{ inventory_hostname }}"
 
-   - name: What is my group_names
+   - name: group_names
      debug:
        msg: "{{ group_names }}"
 
-   - name: What is my ansible_hostname
+   - name: ansible_hostname
      debug:
        msg: "{{ ansible_hostname }}"
 
-   - name: What is my ansible_user
+   - name: ansible_user
      debug:
        msg: "{{ ansible_user }}"
+
+   - name: playbook_dir
+     debug:
+       msg: "{{ playbook_dir }}"

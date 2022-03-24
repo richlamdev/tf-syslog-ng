@@ -8,6 +8,7 @@
       - hping3
       - lsof
       - nc
+      - nftables
       - nmap
       - tcpdump
       - tmux
