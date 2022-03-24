@@ -234,7 +234,7 @@ resource "aws_instance" "public_test_instance" {
   count           = 4
   ami             = "ami-0b28dfc7adc325ef4"
   subnet_id       = aws_subnet.public.id
-  security_groups = [aws_security_group.sg_public.id, aws_security_group.sg_icmp.id, aws_security_group.allow_syslog_ng.id]
+  security_groups = [aws_security_group.sg_public.id, aws_security_group.sg_icmp.id, aws_security_group.allow_syslog_ng.id, aws_security_group.allow_dns.id]
   instance_type   = "t3.micro"
   #iam_instance_profile = "EC2SSMRole"
   key_name = "richy-ssh-key"
