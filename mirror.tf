@@ -6,7 +6,7 @@ resource "local_file" "mirror_setup" {
   content  = <<EOF
 #!/bin/bash
 
-MIRROR_HOST=${aws_instance.public_test_instance[4].public_dns}
+MIRROR_HOST=${aws_instance.public_test_instance[4].private_ip}
 
 ip link add name vethinj up type veth peer name vethgw
 ip link set vethgw up
@@ -24,9 +24,9 @@ EOF
 resource "local_file" "multiply" {
   filename = "./mirror/multiply.nft"
   content  = <<EOF
-define MIRROR_HOST=${aws_instance.public_test_instance[4].public_dns}
-define SYSLOG0=${aws_instance.public_test_instance[0].public_dns}
-define SYSLOG1=${aws_instance.public_test_instance[1].public_dns}
+define MIRROR_HOST=${aws_instance.public_test_instance[4].private_ip}
+define SYSLOG0=${aws_instance.public_test_instance[0].private_ip}
+define SYSLOG1=${aws_instance.public_test_instance[1].private_ip}
 
 #define SYSLOGn=12.42.1.3
 
