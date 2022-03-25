@@ -13,13 +13,22 @@
     group: root
     mode: "0644"
 
-- name: copy over localdns.conf
-  copy:
-    src: localdns.conf
+- name: assemble localhosts file
+  assemble:
+    src: "{{ playbook_dir }}/dnshosts"
     dest: "/etc/unbound/localdns.conf"
     owner: root
     group: root
     mode: "0644"
+    remote_src: False
+
+#- name: copy over localdns.conf
+  #copy:
+    #src: localdns.conf
+    #dest: "/etc/unbound/localdns.conf"
+    #owner: root
+    #group: root
+    #mode: "0644"
 
 - name: Enable and always restart unbound
   systemd:

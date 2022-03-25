@@ -1,0 +1,9 @@
+local-data: "syslog-0.tatooine.test.         IN        A      10.0.1.252"
+local_data: "syslog-1.tatooine.test.         IN        A      10.0.1.40"
+local_data: "dns.tatooine.test.              IN        A      10.0.1.142"
+local_data: "client.tatooine.test.           IN        A      10.0.1.48"
+
+local-data-ptr: "10.0.1.252            syslog-0.tatooine.test."
+local-data-ptr: "10.0.1.40            syslog-1.tatooine.test."
+local-data-ptr: "10.0.1.142            dns.tatooine.test."
+local-data-ptr: "10.0.1.48            client.tatooine.test."

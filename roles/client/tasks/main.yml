@@ -15,11 +15,11 @@
   hostname:
     name: client
 
-- name: copy over hosts_append file
-  assemble:
-    src: "{{ playbook_dir }}/hosts"
-    dest: "/etc/hosts"
-    owner: root
-    group: root
-    mode: "0644"
-    remote_src: False
+#- name: copy over hosts_append file
+  #assemble:
+    #src: "{{ playbook_dir }}/hosts"
+    #dest: "/etc/hosts"
+    #owner: root
+    #group: root
+    #mode: "0644"
+    #remote_src: False

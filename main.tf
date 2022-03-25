@@ -220,8 +220,26 @@ resource "aws_security_group" "allow_dns" {
     Name = "allow_dns_from_public_or_private_subnet"
   }
 }
-
 ########################### SECURITY GROUPS ######################
+
+########################### DHCP OPTIONS #########################
+resource "aws_vpc_dhcp_options" "vpc_dhcp_options" {
+  domain_name         = "tatooine.test"
+  domain_name_servers = ["127.0.0.1", "${aws_instance.public_test_instance[2].private_ip}", "10.0.0.2"]
+
+  tags = {
+    Name = "richy's vpc_dhcp_options"
+  }
+}
+
+resource "aws_vpc_dhcp_options_association" "richy_dns_resolver" {
+  vpc_id          = aws_vpc.vpc.id
+  dhcp_options_id = aws_vpc_dhcp_options.vpc_dhcp_options.id
+}
+
+
+########################### DHCP OPTIONS #########################
+
 
 ########################### EC2 INSTANCES ########################
 resource "aws_key_pair" "richy-ssh-key" {
@@ -258,27 +276,27 @@ resource "aws_instance" "private_test_instance" {
 }
 
 output "Private_IPv4_addresses_public_instance_syslog_ng_0" {
-  value = aws_instance.public_test_instance[0].private_ip
+  value       = aws_instance.public_test_instance[0].private_ip
   description = "Syslog NG 0 private IP"
 }
 
 output "Private_IPv4_addresses_public_instance_syslog_ng_1" {
-  value = aws_instance.public_test_instance[1].private_ip
+  value       = aws_instance.public_test_instance[1].private_ip
   description = "Syslog NG 1 private IP"
 }
 
 output "Private_IPv4_addresses_public_instance_dns_server" {
-  value = aws_instance.public_test_instance[2].private_ip
+  value       = aws_instance.public_test_instance[2].private_ip
   description = "DNS server private IP"
 }
 
 output "Private_IPv4_addresses_public_instance_client" {
-  value = aws_instance.public_test_instance[3].private_ip
+  value       = aws_instance.public_test_instance[3].private_ip
   description = "client private IP"
 }
 
 #output "Public_IPv4_addresses" {
-  #value = aws_instance.public_test_instance.*.public_ip
+#value = aws_instance.public_test_instance.*.public_ip
 #}
 
 output "Public_IPv4_DNS_syslog_ng_0" {
@@ -299,9 +317,9 @@ output "Public_IPv4_DNS_client" {
 ########################### EC2 INSTANCES ########################
 
 ########################### OUTPUT INVENTORY FOR ANSIBLE #########
-resource "local_file" inventory {
+resource "local_file" "inventory" {
   filename = "./inventory"
-  content = <<EOF
+  content  = <<EOF
 [syslogng]
 ${aws_instance.public_test_instance[0].public_dns}
 ${aws_instance.public_test_instance[1].public_dns}
@@ -327,14 +345,22 @@ EOF
 ########################### OUTPUT INVENTORY FOR ANSIBLE #########
 
 ########################### HOSTS FILE FOR EACH INSTANCE #########
-resource "local_file" hosts_append {
-  filename = "./hosts/hosts_append"
-  content = <<EOF
 
-${aws_instance.public_test_instance[0].private_ip}     syslog-0
-${aws_instance.public_test_instance[1].private_ip}     syslog-1
-${aws_instance.public_test_instance[2].private_ip}     dns-server
-${aws_instance.public_test_instance[3].private_ip}     client
+locals {
+  hosts_append = <<-EOT
+local-data: "syslog-0.tatooine.test.         IN        A      ${aws_instance.public_test_instance[0].private_ip}"
+local-data: "syslog-1.tatooine.test.         IN        A      ${aws_instance.public_test_instance[1].private_ip}"
+local-data: "dns.tatooine.test.              IN        A      ${aws_instance.public_test_instance[2].private_ip}"
+local-data: "client.tatooine.test.           IN        A      ${aws_instance.public_test_instance[3].private_ip}"
 
-EOF
+local-data-ptr: "${aws_instance.public_test_instance[0].private_ip}            syslog-0.tatooine.test."
+local-data-ptr: "${aws_instance.public_test_instance[1].private_ip}            syslog-1.tatooine.test."
+local-data-ptr: "${aws_instance.public_test_instance[2].private_ip}            dns.tatooine.test."
+local-data-ptr: "${aws_instance.public_test_instance[3].private_ip}            client.tatooine.test."
+EOT
+}
+
+resource "local_file" "hosts_append" {
+  filename = "./dnshosts/hosts_append"
+  content = local.hosts_append
 }
