@@ -9,7 +9,7 @@
     dest: "/home/{{ ansible_user }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: "0660"
+    mode: "0770"
 
 - name: copy over multiply.nft file
   copy:
@@ -21,6 +21,6 @@
 
 - name: Setup mirror with mirror_setup.sh and multiply.nft
   shell: |
-    sudo "/home//{{ ansible_user}}/mirror_setup.sh"
+    sudo "/home/{{ ansible_user}}/mirror_setup.sh"
     sudo nft flush ruleset
-    sudo nft --file "/home//{{ ansible_user}}/multiply.nft"
+    sudo nft --file "/home/{{ ansible_user}}/multiply.nft"

@@ -34,3 +34,5 @@ override.tf.json
 *.log
 inventory
 hosts_append
+mirror_setup.sh
+multiply.nft

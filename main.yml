@@ -27,3 +27,6 @@
 
     - role: client
       when: inventory_hostname in groups ['client']
+
+    - role: mirror
+      when: inventory_hostname in groups ['mirror']
