@@ -249,7 +249,7 @@ resource "aws_key_pair" "richy-ssh-key" {
 
 # public instance
 resource "aws_instance" "public_test_instance" {
-  count           = 4
+  count           = 5
   ami             = "ami-0b28dfc7adc325ef4"
   subnet_id       = aws_subnet.public.id
   security_groups = [aws_security_group.sg_public.id, aws_security_group.sg_icmp.id, aws_security_group.allow_syslog_ng.id, aws_security_group.allow_dns.id]
@@ -262,18 +262,18 @@ resource "aws_instance" "public_test_instance" {
 }
 
 # private instance
-resource "aws_instance" "private_test_instance" {
-  ami             = "ami-0b28dfc7adc325ef4"
-  subnet_id       = aws_subnet.private.id
-  security_groups = [aws_security_group.sg_private.id, aws_security_group.sg_icmp.id]
-  instance_type   = "t3.micro"
-  count           = 1
-  #iam_instance_profile = "EC2SSMRole"
-  #key_name             = "richy-ssh-key"
-  tags = {
-    Name = "private-instance-test"
-  }
-}
+#resource "aws_instance" "private_test_instance" {
+#ami             = "ami-0b28dfc7adc325ef4"
+#subnet_id       = aws_subnet.private.id
+#security_groups = [aws_security_group.sg_private.id, aws_security_group.sg_icmp.id]
+#instance_type   = "t3.micro"
+#count           = 1
+#iam_instance_profile = "EC2SSMRole"
+#key_name             = "richy-ssh-key"
+#tags = {
+#Name = "private-instance-test"
+#}
+#}
 
 output "Private_IPv4_addresses_public_instance_syslog_ng_0" {
   value       = aws_instance.public_test_instance[0].private_ip
@@ -295,9 +295,11 @@ output "Private_IPv4_addresses_public_instance_client" {
   description = "client private IP"
 }
 
-#output "Public_IPv4_addresses" {
-#value = aws_instance.public_test_instance.*.public_ip
-#}
+output "Private_IPv4_addresses_public_instance_mirror" {
+  value       = aws_instance.public_test_instance[4].private_ip
+  description = "mirror private IP"
+}
+
 
 output "Public_IPv4_DNS_syslog_ng_0" {
   value = aws_instance.public_test_instance[0].public_dns
@@ -314,6 +316,10 @@ output "Public_IPv4_DNS_dns_server" {
 output "Public_IPv4_DNS_client" {
   value = aws_instance.public_test_instance[3].public_dns
 }
+
+output "Public_IPv4_mirror_relay" {
+  value = aws_instance.public_test_instance[4].public_dns
+}
 ########################### EC2 INSTANCES ########################
 
 ########################### OUTPUT INVENTORY FOR ANSIBLE #########
@@ -329,6 +335,9 @@ ${aws_instance.public_test_instance[2].public_dns}
 
 [client]
 ${aws_instance.public_test_instance[3].public_dns}
+
+[mirror]
+${aws_instance.public_test_instance[4].public_dns}
 
 [multi:children]
 syslogng
@@ -352,15 +361,17 @@ local-data: "syslog-0.tatooine.test.         IN        A      ${aws_instance.pub
 local-data: "syslog-1.tatooine.test.         IN        A      ${aws_instance.public_test_instance[1].private_ip}"
 local-data: "dns.tatooine.test.              IN        A      ${aws_instance.public_test_instance[2].private_ip}"
 local-data: "client.tatooine.test.           IN        A      ${aws_instance.public_test_instance[3].private_ip}"
+local-data: "mirror.tatooine.test.           IN        A      ${aws_instance.public_test_instance[4].private_ip}"
 
 local-data-ptr: "${aws_instance.public_test_instance[0].private_ip}            syslog-0.tatooine.test."
 local-data-ptr: "${aws_instance.public_test_instance[1].private_ip}            syslog-1.tatooine.test."
 local-data-ptr: "${aws_instance.public_test_instance[2].private_ip}            dns.tatooine.test."
 local-data-ptr: "${aws_instance.public_test_instance[3].private_ip}            client.tatooine.test."
+local-data-ptr: "${aws_instance.public_test_instance[4].private_ip}            mirror.tatooine.test."
 EOT
 }
 
 resource "local_file" "hosts_append" {
   filename = "./dnshosts/hosts_append"
-  content = local.hosts_append
+  content  = local.hosts_append
 }
