@@ -33,4 +33,4 @@ override.tf.json
 *.swp
 *.log
 inventory
-**/dnshosts/*
+hosts_append
