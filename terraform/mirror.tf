@@ -2,7 +2,7 @@
 
 ############### OUTPUT MIRROR SETUP FOR ANSIBLE #########
 resource "local_file" "mirror_setup" {
-  filename = "./mirror/mirror_setup.sh"
+  filename = "../ansible/mirror/mirror_setup.sh"
   content  = <<EOF
 #!/bin/bash
 
@@ -22,7 +22,7 @@ EOF
 
 ############### OUTPUT NTABLES MIRROR FOR ANSIBLE #######
 resource "local_file" "multiply" {
-  filename = "./mirror/multiply.nft"
+  filename = "../ansible/mirror/multiply.nft"
   content  = <<EOF
 define MIRROR_HOST=${aws_instance.public_test_instance[4].private_ip}
 define SYSLOG0=${aws_instance.public_test_instance[0].private_ip}

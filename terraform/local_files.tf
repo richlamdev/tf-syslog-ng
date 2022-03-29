@@ -1,6 +1,6 @@
 ########################### OUTPUT INVENTORY FOR ANSIBLE #########
 resource "local_file" "inventory" {
-  filename = "./inventory"
+  filename = "../ansible/inventory"
   content  = <<EOF
 [syslogng]
 ${aws_instance.public_test_instance[0].public_dns}
@@ -31,8 +31,9 @@ EOF
 
 ########################### HOSTS FILE FOR EACH INSTANCE #########
 
-locals {
-  hosts_append = <<-EOT
+resource "local_file" "hosts_append" {
+  filename = "../ansible/dnshosts/hosts_append"
+  content  = <<EOF
 local-data: "syslog-0.tatooine.test.         IN        A      ${aws_instance.public_test_instance[0].private_ip}"
 local-data: "syslog-1.tatooine.test.         IN        A      ${aws_instance.public_test_instance[1].private_ip}"
 local-data: "dns.tatooine.test.              IN        A      ${aws_instance.public_test_instance[2].private_ip}"
@@ -44,10 +45,18 @@ local-data-ptr: "${aws_instance.public_test_instance[1].private_ip}            s
 local-data-ptr: "${aws_instance.public_test_instance[2].private_ip}            dns.tatooine.test."
 local-data-ptr: "${aws_instance.public_test_instance[3].private_ip}            client.tatooine.test."
 local-data-ptr: "${aws_instance.public_test_instance[4].private_ip}            mirror.tatooine.test."
-EOT
+EOF
 }
 
-resource "local_file" "hosts_append" {
-  filename = "./dnshosts/hosts_append"
-  content  = local.hosts_append
+
+resource "local_file" "ansible_vars" {
+  filename = "../ansible/tf_ansible_vars/ansible_vars.yml"
+  content = <<EOF
+syslog_0: ${aws_instance.public_test_instance[0].private_ip}
+syslog_1: ${aws_instance.public_test_instance[1].private_ip}
+dns: ${aws_instance.public_test_instance[2].private_ip}
+client: ${aws_instance.public_test_instance[3].private_ip}
+mirror: ${aws_instance.public_test_instance[4].private_ip}
+
+EOF
 }

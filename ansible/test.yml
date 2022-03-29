@@ -1,0 +1,30 @@
+---
+- name: "Playbook to test the inventory_hostname and ansible_hostname"
+  hosts: all
+  gather_facts: True
+ # vars_files example
+  #vars_files:
+    #- "./tf_ansible_vars/ansible_vars.yml"
+  tasks:
+   # include_vars example
+    - include_vars: "./tf_ansible_vars/ansible_vars.yml"
+    - name: inventory_hostname
+      debug:
+        msg: "{{ inventory_hostname }}"
+  
+    - name: group_names
+      debug:
+        msg: "{{ group_names }}"
+  
+    - name: ansible_hostname
+      debug:
+        msg: "{{ ansible_hostname }}"
+  
+    - name: ansible_user
+      debug:
+        msg: "{{ ansible_user }}"
+  
+    - name: playbook_dir
+      debug:
+        msg: "{{ playbook_dir }}"
+
