@@ -36,3 +36,4 @@ inventory
 hosts_append
 mirror_setup.sh
 multiply.nft
+**/tf_ansible_vars/*
