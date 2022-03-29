@@ -1,5 +1,4 @@
 ---
-
 - name: Ensure git is installed.
   dnf:
     name: "git"

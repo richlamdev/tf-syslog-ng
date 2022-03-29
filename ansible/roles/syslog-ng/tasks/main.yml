@@ -1,4 +1,16 @@
 ---
+# not a scalable solution for DNS hostname allocation; acceptable solution for this PoC
+- include_vars: "{{ playbook_dir }}/tf_ansible_vars/ansible_vars.yml"
+- name: Change hostname to syslog-0 server
+  hostname:
+    name: syslog-0
+  when: syslog_0  == ansible_default_ipv4['address']
+
+- name: Change hostname to syslog-1 server
+  hostname:
+    name: syslog-1
+  when: syslog_1  == ansible_default_ipv4['address']
+
 - name: Install syslog-ng package
   dnf:
     state: latest

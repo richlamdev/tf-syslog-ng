@@ -28,3 +28,6 @@
       debug:
         msg: "{{ playbook_dir }}"
 
+    - name: ansible_default_ipv4[address]
+      debug:
+        msg: "{{ ansible_default_ipv4['address'] }}"
