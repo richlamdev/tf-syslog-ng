@@ -1,4 +1,8 @@
 ---
+- name: Change hostname to dns
+  hostname:
+    name: dns
+
 - name: Install unbound package
   dnf:
     state: latest
