@@ -48,7 +48,7 @@
 export NO_CLR=[0m
 export CLR_GREEN_TEST=[32m
 export CLR_BLACK=[30m
-export CLR_GRAY=[30\;1m
+export CLR_GRAY='\e[1;30m'
 export CLR_RED=[31m
 export CLR_LGHTRED=[31\;1m
 export CLR_GREEN=[32m
@@ -66,6 +66,8 @@ export CLR_LGHTWHITE=[37\;1m
 export CLR_LGHTPINK207="\[\033[01;38;5;207m\]"
 export CLR_YELLOW226="\[\033[01;38;5;226m\]"
 export CLR_BLUE027="\[\033[01;38;5;027m\]"
+export CLR_PURPLE='\e[0;35m'
+export CLR_BROWN='\e[0;33m'
 
 ###########################################################################
 # Function: dbinstance_fn                                                 #
@@ -105,10 +107,19 @@ dbinstance_fn () {
 ###########################################################################
 who_where_fn () {
 		WHATSERVER=`hostname`
-      if [ `echo ${WHATSERVER} | egrep '(xl|xd|qa|tst|test)'` ];then
-         WHATSRVCLR="${NO_CLR}${PSDBDEVCLR}${WHATSERVER}${NO_CLR}"
-      elif [ `echo ${WHATSERVER} | egrep '(xp|prod)'` ] || [ ${WHATSERVER} == "madison" ];then
-         WHATSRVCLR="${NO_CLR}${PSDBPRDCLR}${WHATSERVER}${NO_CLR}"
+      if [ `echo ${WHATSERVER} | egrep '(client)'` ];then
+         #WHATSRVCLR="${NO_CLR}${PSDBDEVCLR}${WHATSERVER}${NO_CLR}"
+         WHATSRVCLR="${CLR_WHITE}${WHATSERVER}${CLR_WHITE}"
+
+      elif [ `echo ${WHATSERVER} | egrep '(syslog)'` ] ;then
+         WHATSRVCLR="${CLR_RED}${WHATSERVER}${CLR_RED}"
+
+      elif [ `echo ${WHATSERVER} | egrep '(mirror)'` ] ;then
+         WHATSRVCLR="${CLR_PURPLE}${WHATSERVER}${CLR_PURPLE}"
+
+      elif [ `echo ${WHATSERVER} | egrep '(dns)'` ] ;then
+         WHATSRVCLR="${CLR_BROWN}${WHATSERVER}${CLR_BROWN}"
+
       else
          WHATSRVCLR="${NO_CLR}${WHATSERVER}${NO_CLR}"
          #WHATSRVCLR="${CLR_LGHTPINK207}${WHATSERVER}" # changed default to pink
