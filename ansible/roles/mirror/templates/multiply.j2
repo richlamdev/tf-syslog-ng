@@ -1,0 +1,27 @@
+define MIRROR_HOST={{ mirror }}
+define SYSLOG0={{ syslog_0 }}
+define SYSLOG1={{ syslog_1 }}
+
+#define SYSLOGn=12.42.1.3
+
+table ip multiply
+delete table ip multiply
+
+table ip multiply {
+        chain c {
+                type filter hook prerouting priority -300; policy accept;
+                iif != vethgw ip daddr $MIRROR_HOST udp dport 514 ip saddr set $MIRROR_HOST goto cmultiply
+        }
+
+        chain cmultiply {
+                jump cdnatdup
+                drop
+        }
+
+        chain cdnatdup {
+                ip daddr set $SYSLOG0 dup to $MIRROR_HOST device vethinj
+                ip daddr set $SYSLOG1 dup to $MIRROR_HOST device vethinj
+
+                #ip daddr set $SYSLOGn dup to $MIRROR_HOST device vethinj
+        }
+}
