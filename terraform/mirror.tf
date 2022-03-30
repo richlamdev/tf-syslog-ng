@@ -2,8 +2,8 @@
 #
 ################ OUTPUT MIRROR SETUP FOR ANSIBLE #########
 #resource "local_file" "mirror_setup" {
-  #filename = "../ansible/mirror/mirror_setup.sh"
-  #content  = <<EOF
+#filename = "../ansible/mirror/mirror_setup.sh"
+#content  = <<EOF
 ##!/bin/bash
 #
 #MIRROR_HOST=${aws_instance.public_test_instance[4].private_ip}
@@ -22,8 +22,8 @@
 #
 ################ OUTPUT NTABLES MIRROR FOR ANSIBLE #######
 #resource "local_file" "multiply" {
-  #filename = "../ansible/mirror/multiply.nft"
-  #content  = <<EOF
+#filename = "../ansible/mirror/multiply.nft"
+#content  = <<EOF
 #define MIRROR_HOST=${aws_instance.public_test_instance[4].private_ip}
 #define SYSLOG0=${aws_instance.public_test_instance[0].private_ip}
 #define SYSLOG1=${aws_instance.public_test_instance[1].private_ip}
@@ -34,22 +34,22 @@
 #delete table ip multiply
 #
 #table ip multiply {
-        #chain c {
-                #type filter hook prerouting priority -300; policy accept;
-                #iif != vethgw ip daddr $MIRROR_HOST udp dport 514 ip saddr set $MIRROR_HOST goto cmultiply
-        #}
+#chain c {
+#type filter hook prerouting priority -300; policy accept;
+#iif != vethgw ip daddr $MIRROR_HOST udp dport 514 ip saddr set $MIRROR_HOST goto cmultiply
+#}
 #
-        #chain cmultiply {
-                #jump cdnatdup
-                #drop
-        #}
+#chain cmultiply {
+#jump cdnatdup
+#drop
+#}
 #
-        #chain cdnatdup {
-                #ip daddr set $SYSLOG0 dup to $MIRROR_HOST device vethinj
-                #ip daddr set $SYSLOG1 dup to $MIRROR_HOST device vethinj
+#chain cdnatdup {
+#ip daddr set $SYSLOG0 dup to $MIRROR_HOST device vethinj
+#ip daddr set $SYSLOG1 dup to $MIRROR_HOST device vethinj
 #
-                ##ip daddr set $SYSLOGn dup to $MIRROR_HOST device vethinj
-        #}
+##ip daddr set $SYSLOGn dup to $MIRROR_HOST device vethinj
+#}
 #}
 #EOF
 #}

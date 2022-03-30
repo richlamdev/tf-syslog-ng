@@ -224,8 +224,9 @@ resource "aws_security_group" "allow_dns" {
 
 ########################### DHCP OPTIONS #########################
 resource "aws_vpc_dhcp_options" "vpc_dhcp_options" {
-  domain_name         = "tatooine.test"
-  domain_name_servers = ["127.0.0.1", "${aws_instance.public_test_instance[2].private_ip}", "10.0.0.2"]
+  domain_name = "tatooine.test"
+  #domain_name_servers = ["127.0.0.1", "10.0.0.2"]
+  domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
     Name = "richy's vpc_dhcp_options"
@@ -245,13 +246,56 @@ resource "aws_route53_zone" "private" {
   }
 }
 
-resource "aws_route53_record" "client" {
+variable "tatooine_A_records" {
+  default = ["syslog-0", "syslog-1", "dns", "client", "mirror"]
+}
+
+resource "aws_route53_record" "syslog0" {
   zone_id = aws_route53_zone.private.zone_id
-  name    = "client"
+  count   = 5
+  name    = element(var.tatooine_A_records, count.index)
   type    = "A"
   ttl     = "300"
-  records = [aws_instance.public_test_instance[3].private_ip]
+  records = [
+    aws_instance.public_test_instance[0].private_ip,
+    aws_instance.public_test_instance[1].private_ip,
+    aws_instance.public_test_instance[2].private_ip,
+    aws_instance.public_test_instance[3].private_ip,
+    aws_instance.public_test_instance[4].private_ip
+  ]
 }
+
+#resource "aws_route53_record" "syslog1" {
+#zone_id = aws_route53_zone.private.zone_id
+#name    = "syslog-1"
+#type    = "A"
+#ttl     = "300"
+#records = [aws_instance.public_test_instance[1].private_ip]
+#}
+#
+#resource "aws_route53_record" "dns" {
+#zone_id = aws_route53_zone.private.zone_id
+#name    = "dns"
+#type    = "A"
+#ttl     = "300"
+#records = [aws_instance.public_test_instance[2].private_ip]
+#}
+#
+#resource "aws_route53_record" "client" {
+#zone_id = aws_route53_zone.private.zone_id
+#name    = "client"
+#type    = "A"
+#ttl     = "300"
+#records = [aws_instance.public_test_instance[3].private_ip]
+#}
+#
+#resource "aws_route53_record" "mirror" {
+#zone_id = aws_route53_zone.private.zone_id
+#name    = "mirror"
+#type    = "A"
+#ttl     = "300"
+#records = [aws_instance.public_test_instance[4].private_ip]
+#}
 
 ########################### DHCP OPTIONS #########################
 

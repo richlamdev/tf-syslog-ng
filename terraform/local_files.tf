@@ -51,7 +51,7 @@ EOF
 
 resource "local_file" "ansible_vars" {
   filename = "../ansible/tf_ansible_vars/ansible_vars.yml"
-  content = <<EOF
+  content  = <<EOF
 syslog_0: ${aws_instance.public_test_instance[0].private_ip}
 syslog_1: ${aws_instance.public_test_instance[1].private_ip}
 dns: ${aws_instance.public_test_instance[2].private_ip}
