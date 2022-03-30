@@ -1,12 +1,23 @@
 ---
+
+- include_vars: "{{ playbook_dir}}/tf_ansible_vars/ansible_vars.yml"
+
 - name: Change hostname to mirror (for mirror ec2 instance)
   hostname:
     name: mirror
 
-- name: copy over mirror_setup.sh file
-  copy:
-    src: "{{ playbook_dir }}/mirror/mirror_setup.sh"
-    dest: "/home/{{ ansible_user }}"
+#- name: copy over mirror_setup.sh file
+  #copy:
+    #src: "{{ playbook_dir }}/mirror/mirror_setup.sh"
+    #dest: "/home/{{ ansible_user }}"
+    #owner: "{{ ansible_user }}"
+    #group: "{{ ansible_user }}"
+    #mode: "0770"
+
+- name: copy over template mirror_setup.sh file
+  template:
+    src: mirror_setup.j2
+    dest: "/home/{{ ansible_user }}/mirror_setup.sh"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0770"
