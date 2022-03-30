@@ -237,6 +237,21 @@ resource "aws_vpc_dhcp_options_association" "richy_dns_resolver" {
   dhcp_options_id = aws_vpc_dhcp_options.vpc_dhcp_options.id
 }
 
+resource "aws_route53_zone" "private" {
+  name = "tatooine.test"
+
+  vpc {
+    vpc_id = aws_vpc.vpc.id
+  }
+}
+
+resource "aws_route53_record" "client" {
+  zone_id = aws_route53_zone.private.zone_id
+  name    = "client"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.public_test_instance[3].private_ip]
+}
 
 ########################### DHCP OPTIONS #########################
 
