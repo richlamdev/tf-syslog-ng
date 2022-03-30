@@ -24,3 +24,11 @@
     sudo "/home/{{ ansible_user}}/mirror_setup.sh"
     sudo nft flush ruleset
     sudo nft --file "/home/{{ ansible_user}}/multiply.nft"
+
+- name: copy over t_dump.sh
+  copy:
+    src: t_dump.sh
+    dest: "/home/ec2-user/t_dump.sh"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0770"

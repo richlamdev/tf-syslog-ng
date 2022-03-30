@@ -50,3 +50,19 @@
     name: rsyslog
     enabled: False
     state: stopped
+
+- name: create /var/log/fromnet file (touch)
+  file:
+    path: /var/log/fromnet
+    state: touch
+    mode: 0660
+    owner: root
+    group: root
+
+- name: copy over view_syslog.sh file
+  copy:
+    src: view_syslog.sh
+    dest: "/root/view_syslog.sh"
+    owner: root
+    group: root
+    mode: "0770"
