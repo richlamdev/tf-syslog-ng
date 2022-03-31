@@ -226,6 +226,7 @@ resource "aws_security_group" "allow_dns" {
 resource "aws_vpc_dhcp_options" "vpc_dhcp_options" {
   domain_name = "tatooine.test"
   #domain_name_servers = ["127.0.0.1", "10.0.0.2"]
+  #domain_name_servers = ["AmazonProvidedDNS", "${aws_instance.public_test_instance[2].private_ip}" ]
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
