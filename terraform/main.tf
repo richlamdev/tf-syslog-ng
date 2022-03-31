@@ -246,23 +246,36 @@ resource "aws_route53_zone" "private" {
   }
 }
 
-variable "tatooine_A_records" {
-  default = ["syslog-0", "syslog-1", "dns", "client", "mirror"]
+#variable "tatooine_A_records" {
+#  default = ["syslog-0", "syslog-1", "dns", "client", "mirror"]
+#}
+
+locals {
+  host_names = {
+    namea = "syslog-0.tatooine.test"
+    nameb = "syslog-1.tatooine.test"
+    namec = "dns.tatooine.test"
+    named = "client.tatooine.test"
+    namee = "mirror.tatooine.test"
+  }
+  deploy_names = {
+    deploya = aws_instance.public_test_instance[0]
+    deployb = aws_instance.public_test_instance[1]
+    deployc = aws_instance.public_test_instance[2]
+    deployd = aws_instance.public_test_instance[3]
+    deploye = aws_instance.public_test_instance[4]
+  }
+  host_deploy_names = zipmap(values(local.host_names),values(local.deploy_names))
 }
 
-resource "aws_route53_record" "syslog0" {
+resource "aws_route53_record" "domain_records" {
+  for_each = local.host_deploy_names
   zone_id = aws_route53_zone.private.zone_id
-  count   = 5
-  name    = element(var.tatooine_A_records, count.index)
+  allow_overwrite = true
+  name    = each.key
   type    = "A"
   ttl     = "300"
-  records = [
-    aws_instance.public_test_instance[0].private_ip,
-    aws_instance.public_test_instance[1].private_ip,
-    aws_instance.public_test_instance[2].private_ip,
-    aws_instance.public_test_instance[3].private_ip,
-    aws_instance.public_test_instance[4].private_ip
-  ]
+  records = [each.value.private_ip]
 }
 
 #resource "aws_route53_record" "syslog1" {
