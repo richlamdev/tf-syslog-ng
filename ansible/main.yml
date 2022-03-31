@@ -30,3 +30,5 @@
 
     - role: mirror
       when: inventory_hostname in groups ['mirror']
+
+    - role: dns-client

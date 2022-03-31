@@ -1,4 +1,7 @@
 ---
+
+- include_vars: "{{ playbook_dir}}/tf_ansible_vars/ansible_vars.yml"
+
 - name: Change hostname to dns
   hostname:
     name: dns
@@ -17,14 +20,14 @@
     group: root
     mode: "0644"
 
-- name: assemble localhosts file
-  assemble:
-    src: "{{ playbook_dir }}/dnshosts"
-    dest: "/etc/unbound/localdns.conf"
-    owner: root
-    group: root
-    mode: "0644"
-    remote_src: False
+#- name: assemble localhosts file
+  #assemble:
+    #src: "{{ playbook_dir }}/dnshosts"
+    #dest: "/etc/unbound/localdns.conf"
+    #owner: root
+    #group: root
+    #mode: "0644"
+    #remote_src: False
 
 #- name: copy over localdns.conf
   #copy:
@@ -33,6 +36,14 @@
     #owner: root
     #group: root
     #mode: "0644"
+
+- name: copy over localdns.conf template file
+  template:
+    src: localdns.conf
+    dest: "/etc/unbound/localdns.conf"
+    owner: root
+    group: root
+    mode: "0644"
 
 - name: Enable and always restart unbound
   systemd:

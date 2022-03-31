@@ -1,0 +1,30 @@
+---
+- include_vars: "{{ playbook_dir}}/tf_ansible_vars/ansible_vars.yml"
+
+- name: copy over 90-dns-none.conf file
+  copy:
+    src: 90-dns-none.conf
+    dest: "/etc/NetworkManager/conf.d/90-dns-none.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: reload NetworkManager
+  systemd:
+    name: NetworkManager
+    enabled: True
+    state: reloaded
+
+- name: copy over resolv.conf file
+  template:
+    src: resolv.conf.j2
+    dest: "/etc/resolv.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: reload NetworkManager
+  systemd:
+    name: NetworkManager
+    enabled: True
+    state: reloaded
