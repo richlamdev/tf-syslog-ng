@@ -39,16 +39,21 @@ sandboxes via [acloudguru](https://acloudguru.com/))
 
 ### Basic usage
 
-Update your AWS credentials.\
+* Update your AWS credentials.\
 ```aws configure```
 
-Create a SSH key pair, and ensure the private key is located in your home folder under .ssh/ (aka ~/.ssh)
+* Create a SSH key pair, and ensure the private key is located in your home folder under ~/.ssh (or /home/<your-username>/.ssh/)
+
+The ssh key name is presently named: `id_ed25519_tf_acg.pub`.  You will need to name your key the same, alternatively, edit main.tf
+to reflect your preferred ssh key name.
 
 
-Clone this repo:\
+* Clone this repo:\
 ```git clone https://github.com/richlamdev/tf-syslog-ng```
 
-Deploy infrastructure via Terraform
+* Deploy infrastructure via Terraform
+
+change the terraform directory:
 ```cd tf-syslog-ng/terraform```
 
 ```terraform init```
@@ -59,11 +64,19 @@ Deploy infrastructure via Terraform
 
 It's advisable to leave this terminal open to reference the Terraform outputs.
 This will allow convenient copy & paste of the public DNS hostnames to SSH to.
+To re-display the terraform output, in the event the terminal is closed or out of view, run:\
+```terraform output```
 
-Configure the EC2 instances via Ansible
+* Configure the EC2 instances via Ansible
 
+change to the ansible directory:
+```cd tf-syslog-ng/ansible```
 
+check all ec2 instances are present and reachable via ssh/ansible (optional step)
+```./all_ping.sh```
 
+deploy all changes to the EC2 instances:
+```./deploy.sh```
 
 
 
