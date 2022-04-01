@@ -31,24 +31,24 @@ EOF
 
 ########################### HOSTS FILE FOR EACH INSTANCE #########
 
-resource "local_file" "hosts_append" {
-  filename = "../ansible/dnshosts/hosts_append"
-  content  = <<EOF
-local-data: "syslog-0.tatooine.test.         IN        A      ${aws_instance.public_test_instance[0].private_ip}"
-local-data: "syslog-1.tatooine.test.         IN        A      ${aws_instance.public_test_instance[1].private_ip}"
-local-data: "dns.tatooine.test.              IN        A      ${aws_instance.public_test_instance[2].private_ip}"
-local-data: "client.tatooine.test.           IN        A      ${aws_instance.public_test_instance[3].private_ip}"
-local-data: "mirror.tatooine.test.           IN        A      ${aws_instance.public_test_instance[4].private_ip}"
+#resource "local_file" "hosts_append" {
+  #filename = "../ansible/dnshosts/hosts_append"
+  #content  = <<EOF
+#local-data: "syslog-0.tatooine.test.         IN        A      ${aws_instance.public_test_instance[0].private_ip}"
+#local-data: "syslog-1.tatooine.test.         IN        A      ${aws_instance.public_test_instance[1].private_ip}"
+#local-data: "dns.tatooine.test.              IN        A      ${aws_instance.public_test_instance[2].private_ip}"
+#local-data: "client.tatooine.test.           IN        A      ${aws_instance.public_test_instance[3].private_ip}"
+#local-data: "mirror.tatooine.test.           IN        A      ${aws_instance.public_test_instance[4].private_ip}"
+#
+#local-data-ptr: "${aws_instance.public_test_instance[0].private_ip}            syslog-0.tatooine.test."
+#local-data-ptr: "${aws_instance.public_test_instance[1].private_ip}            syslog-1.tatooine.test."
+#local-data-ptr: "${aws_instance.public_test_instance[2].private_ip}            dns.tatooine.test."
+#local-data-ptr: "${aws_instance.public_test_instance[3].private_ip}            client.tatooine.test."
+#local-data-ptr: "${aws_instance.public_test_instance[4].private_ip}            mirror.tatooine.test."
+#EOF
+#}
 
-local-data-ptr: "${aws_instance.public_test_instance[0].private_ip}            syslog-0.tatooine.test."
-local-data-ptr: "${aws_instance.public_test_instance[1].private_ip}            syslog-1.tatooine.test."
-local-data-ptr: "${aws_instance.public_test_instance[2].private_ip}            dns.tatooine.test."
-local-data-ptr: "${aws_instance.public_test_instance[3].private_ip}            client.tatooine.test."
-local-data-ptr: "${aws_instance.public_test_instance[4].private_ip}            mirror.tatooine.test."
-EOF
-}
-
-
+########################### CREATE ANSIBLE VARS FILE ##############
 resource "local_file" "ansible_vars" {
   filename = "../ansible/tf_ansible_vars/ansible_vars.yml"
   content  = <<EOF
@@ -60,3 +60,4 @@ mirror: ${aws_instance.public_test_instance[4].private_ip}
 
 EOF
 }
+########################### CREATE ANSIBLE VARS FILE ##############
