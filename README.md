@@ -12,6 +12,40 @@ The primary purpose is to provide a temporary testing environment for testing Sy
 
 A second purpose is to enable testing of mirroring syslog network traffic.
 
+## Overview
+
+* VPC
+
+A new VPC is created, this deployment does not make use of a default VPC.
+
+No NACLs are set.  Default NACL's are open in both directions.
+
+* EC2
+
+This will deploy five EC2 instances that are publicly accesible via SSH, over default port 22.  A public key SSH
+is pushed to the instances via terraform which will provide relatively secure access.  See below on pushing a SSH
+key of your choosing.
+
+The Security Groups (SGs) are set to allow ICMP (ping), port 53 UDP (DNS), and port 514 UDP/TCP (syslog), between all
+hosts within the public subnet.
+
+On initial deployment, the default DNS resolution is through the default AWS DNS.  (default subnet + two, in this case, 10.0.0.2)
+The terraform script creates a number of DNS records for the five hosts.  Ths five hosts are:\
+
+client:    emulation of a single workstation or server that sends syslog traffic to the mirror server.
+dns:       local dns server, to resolve local and external dns queries via unbound dns service
+mirror:    server that enables replication of syslog traffic to syslog-0 and syslog-1.  This is scalable to N-systems, if needed.
+syslog-0:  first of two syslog-ng servers that receives syslog traffic from the mirror server
+syslog-1:  second of two syslog-ng servers that receives syslog traffic from the mirror server
+
+However, the ansible deployment will overwrite this default resolution to the DNS server deployed.  All DNS queries will default to
+this instance after ansible is executed.
+
+
+
+
+
+
 ## How to use
 
 ### Prerequisites
@@ -69,13 +103,13 @@ To re-display the terraform output, in the event the terminal is closed or out o
 
 * Configure the EC2 instances via Ansible
 
-change to the ansible directory:
+change to the ansible directory:\
 ```cd tf-syslog-ng/ansible```
 
-check all ec2 instances are present and reachable via ssh/ansible (optional step)
+check all ec2 instances are present and reachable via ssh/ansible (optional step)\
 ```./all_ping.sh```
 
-deploy all changes to the EC2 instances:
+deploy all changes to the EC2 instances:\
 ```./deploy.sh```
 
 
