@@ -315,8 +315,8 @@ resource "aws_route53_record" "domain_records" {
 
 
 ########################### EC2 INSTANCES ########################
-resource "aws_key_pair" "richy-ssh-key" {
-  key_name   = "richy-ssh-key"
+resource "aws_key_pair" "ssh-key" {
+  key_name   = "ssh-key"
   public_key = file(pathexpand("~/.ssh/id_ed25519_tf_acg.pub"))
 }
 
@@ -328,7 +328,7 @@ resource "aws_instance" "public_test_instance" {
   security_groups = [aws_security_group.sg_public.id, aws_security_group.sg_icmp.id, aws_security_group.allow_syslog_ng.id, aws_security_group.allow_dns.id]
   instance_type   = "t3.micro"
   #iam_instance_profile = "EC2SSMRole"
-  key_name = "richy-ssh-key"
+  key_name = "ssh-key"
   tags = {
     Name = "public-instance-test"
   }
@@ -342,7 +342,7 @@ resource "aws_instance" "public_test_instance" {
 #instance_type   = "t3.micro"
 #count           = 1
 #iam_instance_profile = "EC2SSMRole"
-#key_name             = "richy-ssh-key"
+#key_name             = "ssh-key"
 #tags = {
 #Name = "private-instance-test"
 #}
