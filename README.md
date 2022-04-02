@@ -120,7 +120,7 @@ deploy all changes to the EC2 instances:\
 ### Roles
 
 |Roles applied to all instances:     |     |
-| ---------------------------------- | --- |
+|:----------------------------------:| --- |
 |boostrap:                           |ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs or AWS Region)|
 |env:                                |applies customized setting for BASH PS1, enables larger bash history.|
 |repo-epel:                          |enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
@@ -130,10 +130,8 @@ deploy all changes to the EC2 instances:\
 
 
 
-
-
 |Role specific according<br>to host function: |     |
-| ------------------------------------------- | --- |
+|:-------------------------------------------:| --- |
 |Syslog-NG:  |Installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
 |unbound:    |Installs unbound and mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
 |client:     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)|
