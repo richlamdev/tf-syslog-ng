@@ -132,18 +132,12 @@ deploy all changes to the EC2 instances:\
 
 
 
-|Role specific according to host function: |     |
-| --------------------------------------   | --- |
-|Syslog-NG:  |installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
-|unbound:    |installs unbound and mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
-|client:     |clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,|
-|            |and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS|
-|            |names from the DNS server.  This role sets the hostname to client.  The git repos for the|
-|            |[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)|
-
-|mirror:     Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to\
-            syslog-0 and syslog-1 hosts.
-
+|Role specific according<br>to host function: |     |
+| ------------------------------------------- | --- |
+|Syslog-NG:  |Installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
+|unbound:    |Installs unbound and mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
+|client:     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)|
+|mirror:     |Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to syslog-0 and syslog-1 hosts.|
 
 
 
