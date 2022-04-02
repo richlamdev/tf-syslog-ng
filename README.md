@@ -135,7 +135,7 @@ deploy all changes to the EC2 instances:\
 |Role specific according to host function: |     |
 | --------------------------------------   | --- |
 |Syslog-NG:  |installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>
-             |This role sets the hostname accordingly per host.|
+              This role sets the hostname accordingly per host.|
 |unbound:    |installs unbound and mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
 |client:     |clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,|
 |            |and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS|
