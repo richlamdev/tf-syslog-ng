@@ -121,12 +121,12 @@ deploy all changes to the EC2 instances:\
 
 Roles applied to all instances:
 
-boostrap:   ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs or AWS Region)
-env:        applies customized setting for BASH PS1, enables larger bash history.
-repo-epel:  enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]
-packages:   installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim
-selinux:    sets SELinux to permissive.  Not ideal for long term testing, but short term testing, this is acceptable.
-vim:        installs custom vimrc settings and a few packages.  (recycled from a personal role I use)
+|boostrap:   |ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs or AWS Region)|
+|env:        |applies customized setting for BASH PS1, enables larger bash history.|
+|repo-epel:  |enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
+|packages:   |installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim
+|selinux:    |sets SELinux to permissive.  Not ideal for long term testing, but short term testing, this is acceptable.|
+|vim:        |installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
 
 Role specific according to host function:
 
