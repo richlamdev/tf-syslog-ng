@@ -119,8 +119,8 @@ deploy all changes to the EC2 instances:\
 
 * Roles
 
-|Roles applied to all instances:|
-|:-----------|:----------------:|
+| Roles applied to all instances | |
+| ------------------------------ | --- |
 |boostrap:   |ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs or AWS Region)|
 |env:        |applies customized setting for BASH PS1, enables larger bash history.|
 |repo-epel:  |enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
