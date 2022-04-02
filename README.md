@@ -1,4 +1,18 @@
-# Terraform / Ansible Syslog-NG Test Environment
+# Syslog-NG Test Environment via Terraform / Ansible
+
+* [Introduction](#introduction)
+* [Purpose](#purpose)
+* [Prerequisites](#prerequisites)
+   * [Knowledge](#knowledge)
+   * [Software](#software)
+* [Terraform Overview](#terraform-overview)
+* [How to Use](#how-to-use)
+* [Ansible Overview](#ansible-overview)
+   * [Roles](#roles)
+* [Security Considerations](#security-considerations)
+* [Improvements](#improvements)
+* [References](#references)
+
 
 ## Introduction
 
@@ -6,18 +20,20 @@ This is an example of Infrastructure-as-Code (Iac) example utilizing [Terraform]
 to provision an infrastructure with [Amazon Web Services (AWS)](https://aws.amazon.com/).
 The infrastructure is then configured via configuration management software [Ansible](https://www.ansible.com/).
 
+
 ## Purpose
 
-The primary purpose is to provide a temporary testing environment for testing Syslog-NG configuration.
+The primary purpose is to provide a temporary test environment for testing Syslog-NG configuration.
 
-A second purpose is to enable testing of mirroring syslog network traffic.
+The second purpose is to provide a test platform for mirroring syslog network traffic.
+
 
 ## Prerequisites
 
 ### Knowledge
 
 Although not strictly required, it would be ideal to have familiarity with the following.
-This will go a long way for potential changes to adopt to other applications or testing.
+This will be helpful for potential changes to adopt to other applications or testing.
 
 * Basic AWS knowledge.  VPC/IGW/NATGW/NACLs/SG/EC2
 
@@ -34,6 +50,7 @@ This will go a long way for potential changes to adopt to other applications or 
 * AWS account.  It is possible some charges will be incurred with this test environment.
 I am not aware of potential costs, due to using short-term AWS test environments (aka temporary
 sandboxes via [acloudguru](https://acloudguru.com/))
+
 
 ## Terraform Overview
 
@@ -115,28 +132,40 @@ The all_ping.sh script executes the following:\
 deploy all changes to the EC2 instances:\
 ```./deploy.sh```
 
+
 ## Ansible Overview
 
 ### Roles
 
 |Roles applied to all instances:     |     |
 |:----------------------------------:| --- |
-|boostrap:                           |ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs or AWS Region)|
-|env:                                |applies customized setting for BASH PS1, enables larger bash history.|
-|repo-epel:                          |enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
-|packages:                           |installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim|
-|selinux:                            |sets SELinux to permissive.  Not ideal for long term testing, but short term testing, this is acceptable.|
-|vim:                                |installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
-
+|boostrap:                           |Ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs and/or AWS Region)|
+|env:                                |Applies customized setting for BASH PS1, enables larger bash history.|
+|repo-epel:                          |Enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
+|packages:                           |Installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim|
+|selinux:                            |Sets SELinux to permissive.  Not ideal for long term testing.|
+|vim:                                |Installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
 
 
 |Role specific according<br>to host function: |     |
 |:-------------------------------------------:| --- |
 |Syslog-NG:  |Installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
 |unbound:    |Installs unbound and mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
-|client:     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)|
-|mirror:     |Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to syslog-0 and syslog-1 hosts.|
+|client:     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)<br> This sets the hostname to client.|
+|mirror:     |Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to syslog-0 and syslog-1 hosts.<br>This sets the hostname to mirror.|
 
+
+## Security Considerations
+
+* As mentioned, NACLs are not used/applied.  Naturally, and added layer of defense would be to enable NACLs as required.
+* SELinux is effectively disabled.  Ideally this would be enabled.
+* Host based firewall is not enabled.
+* Potentially remove public access to all instance by using AWS SSM.  Another alternative would be to use a bastion host, then access a private subnet.
+
+
+## Improvements
+
+* clean up Terraform, specifically use more variables and reduce violation of DRY principle.
 
 
 ## References
@@ -150,15 +179,3 @@ deploy all changes to the EC2 instances:\
 [AWS Route 53 hosted zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html)
 
 [Syslog-NG best practices](https://www.syslog-ng.com/technical-documents/doc/syslog-ng-open-source-edition/3.26/administration-guide/94)
-
-
-
-NOTES:
-
-
-ansible-playbook main.yml -u ec2-user --private-key ~/.ssh/id_ed25519_tf_acg
-
-
-TODO:
-
-- clean up Terraform, specifically use more variables and reduce violation of DRY principle.
