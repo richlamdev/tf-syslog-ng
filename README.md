@@ -35,7 +35,7 @@ This will go a long way for potential changes to adopt to other applications or 
 I am not aware of potential costs, due to using short-term AWS test environments (aka temporary
 sandboxes via [acloudguru](https://acloudguru.com/))
 
-## Overview
+## Terraform Overview
 
 * VPC
 
@@ -50,7 +50,7 @@ A NATGW is also deployed to the public subnet, but is not currently utilized.  N
 
 * EC2
 
-This will deploy five EC2 instances that are publicly accesible via SSH, over default port 22.  A public key SSH
+This will deploy five standard RedHat AMI EC2 instances that are publicly accesible via SSH, over default port 22.  A public key SSH
 is pushed to the instances via terraform which will provide relatively secure access.  See below on pushing a SSH
 key of your choosing.
 
@@ -95,10 +95,11 @@ change the terraform directory:
 
 ```terraform apply --auto-approve```
 
-It's advisable to leave this terminal open to reference the Terraform outputs.
+After ```terraform apply --auto-approve``` executes, it may be preferable to leave this terminal open to reference the Terraform outputs.
 This will allow convenient copy & paste of the public DNS hostnames to SSH to.
 To re-display the terraform output, in the event the terminal is closed or out of view, run:\
 ```terraform output```
+
 
 * Configure the EC2 instances via Ansible
 
@@ -108,8 +109,41 @@ change to the ansible directory:\
 check all ec2 instances are present and reachable via ssh/ansible (optional step)\
 ```./all_ping.sh```
 
+The all_ping.sh script executes the following:\
+```ansible -m ping all -u ec2-user --private-key ~/.ssh/id_ed25519_tf_acg```
+
 deploy all changes to the EC2 instances:\
 ```./deploy.sh```
+
+## Ansible Overview
+
+* Roles
+
+Roles applied to all instances:
+
+boostrap:   ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs or AWS Region)
+env:        applies customized setting for BASH PS1, enables larger bash history.
+repo-epel:  enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]
+packages:   installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim
+selinux:    sets SELinux to permissive.  Not ideal for long term testing, but short term testing, this is acceptable.
+vim:        installs custom vimrc settings and a few packages.  (recycled from a personal role I use)
+
+Role specific according to host function:
+
+Syslog-NG:  installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.\
+            This role sets the hostname accordingly per host.
+
+unbound:    installs unbound and mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.
+
+client:     clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,\
+            and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS\
+            names from the DNS server.  This role sets the hostname to client.  The git repos for the
+            [Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)
+
+mirror:     Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to\
+            syslog-0 and syslog-1 hosts.
+
+
 
 
 ## References
@@ -126,10 +160,8 @@ deploy all changes to the EC2 instances:\
 
 
 
-
 NOTES:
 
-ansible -m ping all -u ec2-user --private-key ~/.ssh/id_ed25519_tf_acg
 
 ansible-playbook main.yml -u ec2-user --private-key ~/.ssh/id_ed25519_tf_acg
 
