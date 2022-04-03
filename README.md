@@ -133,6 +133,10 @@ deploy all changes to the EC2 instances:\
 ```./deploy.sh```
 
 
+From the tf-syslog-ng/ansible directory use the login.sh script to login to the appropriate EC2 instance to start testing.
+
+
+
 ## Ansible Overview
 
 ### Roles
