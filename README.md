@@ -36,7 +36,7 @@ The second purpose is to provide a test platform for mirroring syslog network tr
 ### Knowledge
 
 Although not strictly required, it would be ideal to have familiarity with the following.
-This will be helpful for potential changes to adopt to other applications or testing.
+This will be helpful for potential changes to this project or to adopt to other applications or testing.
 
 * Basic AWS knowledge.  VPC/IGW/NATGW/NACLs/SG/EC2
 
@@ -92,7 +92,7 @@ this instance after ansible is executed.  The intention is to emulate DNS resolu
 
 ## How to use
 
-* Update your AWS credentials.\
+* Update AWS credentials.\
 ```aws configure```
 
 * Create a SSH key pair, and ensure the private key is located in your home folder under ~/.ssh (or /home/<your-username>/.ssh/)
@@ -104,21 +104,16 @@ to reflect your preferred ssh key name.
 * Clone this repo:\
 ```git clone https://github.com/richlamdev/tf-syslog-ng```
 
-* Deploy infrastructure via Terraform
-
-change the terraform directory:
-```cd tf-syslog-ng/terraform```
-
-```terraform init```
-
-```terraform plan```
-
+* Deploy infrastructure via Terraform\
+* change the terraform directory:\
+```cd tf-syslog-ng/terraform```\
+```terraform init```\
+```terraform plan```\
 ```terraform apply --auto-approve```
 
 After ```terraform apply --auto-approve``` executes, it may be preferable to leave this terminal open to reference the Terraform outputs.
 This will allow convenient copy & paste of the public DNS hostnames to SSH to.
-To re-display the terraform output, in the event the terminal is closed or out of view, run:\
-```terraform output```
+To re-display the terraform output, in the event the terminal is closed or out of view, run: ```terraform output```
 
 
 * Configure the EC2 instances via Ansible
