@@ -20,12 +20,15 @@ This is an example of Infrastructure-as-Code (Iac) example utilizing [Terraform]
 to provision an infrastructure with [Amazon Web Services (AWS)](https://aws.amazon.com/).
 The infrastructure is then configured via configuration management software [Ansible](https://www.ansible.com/).
 
-
 ## Purpose
 
 The primary purpose is to provide a temporary test environment for testing Syslog-NG configuration.
 
 The second purpose is to provide a test platform for mirroring syslog network traffic.
+
+## Infrastructure Diagram
+
+![Infrastructure](images/tf-syslog-ng_final.jpg)
 
 
 ## Prerequisites
