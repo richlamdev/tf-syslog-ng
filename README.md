@@ -134,9 +134,23 @@ deploy all changes to the EC2 instances:\
 
 
 From the tf-syslog-ng/ansible directory use the login.sh script to login to the EC2 instances to start testing.
-For example, to log into the client instance:
+For example, to SSH into the client instance:
 
 ![Client login](images/login_example.png)
+
+
+From the client EC2 instance.  Change to the syslog-generator-1 directory:\
+```cd syslog-generator-1```
+
+To send test syslog packets to the mirror instance, use the following command:\
+```python3 syslog_gen.py --port 514 --msg random_message.txt --src_names random_hosts.txt --count 10 --host <internal-ip-mirror-host>```
+
+Where:\
+--port        indicates port to send to.\
+--msg         sends a random line (message) from random_message.txt\
+--src_names   uses a random IP or hostname from random_hosts.txt as the source IP or hostname. (spoofs the source)\
+--count       number of messages to send\
+--host        indicates the host to send to.  In this case send to the mirror host, which will forward the message to syslog-0 and syslog-1\
 
 
 
