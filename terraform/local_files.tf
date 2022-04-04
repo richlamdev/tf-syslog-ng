@@ -32,8 +32,8 @@ EOF
 ########################### HOSTS FILE FOR EACH INSTANCE #########
 
 #resource "local_file" "hosts_append" {
-  #filename = "../ansible/dnshosts/hosts_append"
-  #content  = <<EOF
+#filename = "../ansible/dnshosts/hosts_append"
+#content  = <<EOF
 #local-data: "syslog-0.tatooine.test.         IN        A      ${aws_instance.public_test_instance[0].private_ip}"
 #local-data: "syslog-1.tatooine.test.         IN        A      ${aws_instance.public_test_instance[1].private_ip}"
 #local-data: "dns.tatooine.test.              IN        A      ${aws_instance.public_test_instance[2].private_ip}"

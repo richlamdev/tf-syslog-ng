@@ -266,17 +266,17 @@ locals {
     deployd = aws_instance.public_test_instance[3]
     deploye = aws_instance.public_test_instance[4]
   }
-  host_deploy_names = zipmap(values(local.host_names),values(local.deploy_names))
+  host_deploy_names = zipmap(values(local.host_names), values(local.deploy_names))
 }
 
 resource "aws_route53_record" "domain_records" {
-  for_each = local.host_deploy_names
-  zone_id = aws_route53_zone.private.zone_id
+  for_each        = local.host_deploy_names
+  zone_id         = aws_route53_zone.private.zone_id
   allow_overwrite = true
-  name    = each.key
-  type    = "A"
-  ttl     = "300"
-  records = [each.value.private_ip]
+  name            = each.key
+  type            = "A"
+  ttl             = "300"
+  records         = [each.value.private_ip]
 }
 
 #resource "aws_route53_record" "syslog1" {
@@ -320,10 +320,25 @@ resource "aws_key_pair" "ssh-key" {
   public_key = file(pathexpand("~/.ssh/id_ed25519_tf_acg.pub"))
 }
 
+data "aws_ami" "latest-Redhat" {
+  most_recent = true
+  owners      = ["309956199498"] # Redhat owner ID
+
+  filter {
+    name   = "name"
+    values = ["RHEL_HA-8.5.0_HVM-2*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 # public instance
 resource "aws_instance" "public_test_instance" {
   count           = 5
-  ami             = "ami-0b28dfc7adc325ef4"
+  ami             = "${data.aws_ami.latest-Redhat.id}" # Get latest RH 8.5x image
   subnet_id       = aws_subnet.public.id
   security_groups = [aws_security_group.sg_public.id, aws_security_group.sg_icmp.id, aws_security_group.allow_syslog_ng.id, aws_security_group.allow_dns.id]
   instance_type   = "t3.micro"
