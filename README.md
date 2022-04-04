@@ -7,6 +7,11 @@
    * [Software](#software)
 * [Terraform Overview](#terraform-overview)
 * [How to Use](#how-to-use)
+* [Testing syslog message sending and receiving](#Testing-syslog-message-sending-and-receiving)
+   * [Client Host](#client-host)
+   * [Mirror Host](#mirror-host)
+   * [Syslog Hosts](#syslog-hosts)
+   * [Screen shot of syslog data flow](#Screen-shot-of-syslog-data-flow)
 * [Ansible Overview](#ansible-overview)
    * [Roles](#roles)
 * [Security Considerations](#security-considerations)
@@ -132,7 +137,7 @@ The all_ping.sh script executes the following:\
 deploy all changes to the EC2 instances:\
 ```./deploy.sh```
 
-## Testing Syslog message sending and receiving
+## Testing syslog message sending and receiving
 
 ### Client Host
 
@@ -176,7 +181,7 @@ Run the view_syslog.sh script to continously monitor incoming Syslog-NG logs fro
 To verify the number of logs are symmetric across the syslog servers, line count entries from /var/log/fromnet log file. (syslog-NG log file).  Run the following command after escaping the view_syslog.sh script.\
 ```wc -l /var/log/fromnet```
 
-### Screen shot of how the traffic should be flowing
+### Screen shot of syslog data flow
 
 **Notes:**
 
