@@ -196,22 +196,23 @@ To verify the number of logs are symmetric across the syslog servers, line count
 
 ### Roles
 
-|Roles applied to all instances:    |     |
-|:----------------------------------| --- |
-|boostrap:                          |Ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs and/or AWS Region)|
-|env:                               |Applies customized setting for BASH PS1, enables larger bash history.|
-|repo-epel:                         |Enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
-|packages:                          |Installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim|
-|selinux:                           |Sets SELinux to permissive.  Not ideal for long term testing.|
-|vim:                               |Installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
+|Roles applied to all instances    |     |
+|:---------------------------------| --- |
+|boostrap                          |Ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs and/or AWS Region)|
+|env                               |Applies customized setting for BASH PS1, enables larger bash history.|
+|repo-epel                         |Enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
+|packages                          |Installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim|
+|selinux                           |Sets SELinux to permissive.  Not ideal for long term testing.|
+|vim                               |Installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
+|host-config                       |Configures all hosts to resolve DNS by the host "dns".  Adds appropriate Message of The Day(MOTD) banner to each host.
 
 
-|Role specific according<br>to host function: |     |
-|:------------------------------------------- | --- |
-|Syslog-NG:  |Installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
-|unbound:    |Installs unbound and mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
-|client:     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)<br> This sets the hostname to client.|
-|mirror:     |Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to syslog-0 and syslog-1 hosts.<br>This sets the hostname to mirror.|
+|Role specific according<br>to host function |     |
+|:------------------------------------------ | --- |
+|Syslog-NG  |Installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
+|unbound    |Installs unbound.  Add A/ptr records for the EC2 instances by hostname described here. Additionally adds mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
+|client     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)<br> This sets the hostname to client.|
+|mirror     |Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to syslog-0 and syslog-1 hosts.<br>This sets the hostname to mirror.|
 
 
 ## Security Considerations
@@ -226,6 +227,7 @@ To verify the number of logs are symmetric across the syslog servers, line count
 ## Improvements
 
 * clean up Terraform, specifically use more variables and reduce violation of DRY principle.
+* remove hard coded AMI reference; create an automatic lookup for most recent Redhat AMI
 * invoke Ansible automatically afer Terraform has completed.
 
 
