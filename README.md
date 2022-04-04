@@ -105,16 +105,18 @@ to reflect your preferred ssh key name.
 ```git clone https://github.com/richlamdev/tf-syslog-ng```
 
 * Deploy infrastructure via Terraform\
-* change the terraform directory:\
+
+* Change the terraform directory:\
 ```cd tf-syslog-ng/terraform```\
+
+* Terraform commands:\
 ```terraform init```\
 ```terraform plan```\
 ```terraform apply --auto-approve```
-
+<br/>\
 After ```terraform apply --auto-approve``` executes, it may be preferable to leave this terminal open to reference the Terraform outputs.
 This will allow convenient copy & paste of the public DNS hostnames to SSH to.
 To re-display the terraform output, in the event the terminal is closed or out of view, run: ```terraform output```
-
 
 * Configure the EC2 instances via Ansible
 
@@ -130,6 +132,9 @@ The all_ping.sh script executes the following:\
 deploy all changes to the EC2 instances:\
 ```./deploy.sh```
 
+## Testing Syslog message sending and receiving
+
+### Client Host
 
 From the tf-syslog-ng/ansible directory use the login.sh script to login to the EC2 instances to start testing.
 For example, to SSH into the client instance:
@@ -148,26 +153,56 @@ Where:\
 --msg         sends a random line (message) from random_message.txt\
 --src_names   uses a random IP or hostname from random_hosts.txt as the source IP or hostname. (spoofs the source)\
 --count       number of messages to send\
---host        indicates the host to send to.  In this case send to the mirror host, which will forward the message to syslog-0 and syslog-1\
+--host        indicates the host to send to.  In this case send to the mirror host, which will forward the message to syslog-0 and syslog-1
 
+### Mirror Host
+
+Using the same instruction above to SSH to the client host, SSH to the mirror host.
+
+Run the t_dump.sh script to monitor incoming UDP packets on port 514. (alternatively, if you're familiar with tmux, start tmux, and split the screen do your preference.  tmux instruction/usage is beyond the scope of this project)
+
+```./t_dump.sh```
+
+### Syslog Hosts
+
+Using the same instruction above to SSH to the client host, SSH to both syslog hosts.
+
+Change to the root user:\
+```sudo su -```
+
+Run the view_syslog.sh script to continously monitor incoming Syslog-NG logs from mirror host. (again, invoke tmux if you prefer beforehand)\
+```./view_syslog.sh```
+
+To verify the number of logs are symmetric across the syslog servers, line count entries from /var/log/fromnet log file. (syslog-NG log file).  Run the following command after escaping the view_syslog.sh script.\
+```wc -l /var/log/fromnet```
+
+### Screen shot of how the traffic should be flowing
+
+**Notes:**
+
+* Pink rectangle indicates the command sent from client host. (simulated syslog message(s))
+* White circle ellipse indicates hostname.
+* In this example, the red rectangle indicates last message sent from the client, received from the mirror host, and then received and logged on the syslog-ng servers.
+
+![Example Data Flow](images/syslog_traffic_path.png)
 
 
 ## Ansible Overview
 
 ### Roles
 
-|Roles applied to all instances:     |     |
-|:----------------------------------:| --- |
-|boostrap:                           |Ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs and/or AWS Region)|
-|env:                                |Applies customized setting for BASH PS1, enables larger bash history.|
-|repo-epel:                          |Enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
-|packages:                           |Installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim|
-|selinux:                            |Sets SELinux to permissive.  Not ideal for long term testing.|
-|vim:                                |Installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
+|Roles applied to all instances:    |     |
+|:----------------------------------| --- |
+|boostrap:                          |Ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs and/or AWS Region)|
+|env:                               |Applies customized setting for BASH PS1, enables larger bash history.|
+|repo-epel:                         |Enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
+|packages:                          |Installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim|
+|selinux:                           |Sets SELinux to permissive.  Not ideal for long term testing.|
+|vim:                               |Installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
 
 
 |Role specific according<br>to host function: |     |
-|:-------------------------------------------:| --- |
+|:------------------------------------------- | --- |
 |Syslog-NG:  |Installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
 |unbound:    |Installs unbound and mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
 |client:     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)<br> This sets the hostname to client.|
@@ -177,14 +212,16 @@ Where:\
 ## Security Considerations
 
 * As mentioned, NACLs are not used/applied.  Naturally, and added layer of defense would be to enable NACLs as required.
-* SELinux is effectively disabled.  Ideally this would be enabled.
-* Host based firewall is not enabled.
-* Potentially remove public access to all instance by using AWS SSM.  Another alternative would be to use a bastion host, then access a private subnet.
-
+* SELinux is effectively disabled.  SELinux should be enabled.
+* Remove the script from the root directory on the syslog hosts.
+* Host based firewall should be enabled.
+* Potentially remove public access to all instance by using AWS SSM.
+  * Another alternative would be to use a bastion host, then access a private subnet.
 
 ## Improvements
 
 * clean up Terraform, specifically use more variables and reduce violation of DRY principle.
+* invoke Ansible automatically afer Terraform has completed.
 
 
 ## References
