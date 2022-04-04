@@ -4,9 +4,9 @@
     ansible connection hostname:  {{ ansible_host }}
        distribution and version:  {{ ansible_distribution }} {{ ansible_distribution_version }}
                  kernel version:  {{ ansible_kernel }}
+                       image ID:  {{ instance_metadata.imageId }}
                     instance-id:  {{ instance_metadata.instanceId }}
                   instance-type:  {{ instance_metadata.instanceType }}
-                       image ID:  {{ instance_metadata.instanceId }}
                      private-ip:  {{ instance_metadata.privateIp }}
 
 ()=============================================================================================()
