@@ -28,3 +28,25 @@
     name: NetworkManager
     enabled: True
     state: reloaded
+
+
+- name: Get the instance identity document
+  uri:
+    url: "http://169.254.169.254/latest/dynamic/instance-identity/document"
+    return_content: true
+  register: identity_doc
+
+- set_fact:
+    instance_metadata: "{{ identity_doc.json }}"
+
+- name: Change MOTD banner
+  template:
+    src: motd.j2
+    dest: /etc/motd
+  register: motd_file
+
+- name: Restart ssh when updated
+  service:
+    name: sshd
+    state: restarted
+  when: motd_file.changed
