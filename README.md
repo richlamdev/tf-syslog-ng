@@ -12,7 +12,7 @@
    * [DNS Host](#dns-host)
    * [Mirror Host](#mirror-host)
    * [Syslog Hosts](#syslog-hosts)
-   * [Screen shot of syslog data flow](#Screen-shot-of-syslog-data-flow)
+   * [Syslog data flow](#syslog-data-flow)
 * [Ansible Overview](#ansible-overview)
    * [Roles](#roles)
 * [Security Considerations](#security-considerations)
@@ -199,7 +199,7 @@ Run the view_syslog.sh script to continously monitor incoming Syslog-NG logs fro
 To verify the number of logs are symmetric across the syslog servers, line count entries from /var/log/fromnet log file. (syslog-NG log file).  Run the following command after escaping the view_syslog.sh script.\
 ```wc -l /var/log/fromnet```
 
-### Screen shot of syslog data flow
+### Syslog data flow
 
 **Notes:**
 
