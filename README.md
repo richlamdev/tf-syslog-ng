@@ -6,9 +6,10 @@
    * [Knowledge](#knowledge)
    * [Software](#software)
 * [Terraform Overview](#terraform-overview)
-* [How to Use](#how-to-use)
+* [How to Deploy](#how-to-Deploy)
 * [Testing syslog message sending and receiving](#Testing-syslog-message-sending-and-receiving)
    * [Client Host](#client-host)
+   * [DNS Host](#dns-host)
    * [Mirror Host](#mirror-host)
    * [Syslog Hosts](#syslog-hosts)
    * [Screen shot of syslog data flow](#Screen-shot-of-syslog-data-flow)
@@ -95,7 +96,7 @@ However, the ansible deployment will overwrite this default resolution to the DN
 this instance after ansible is executed.  The intention is to emulate DNS resolution of a on-premise deployment, and not via AWS Route 53.
 
 
-## How to use
+## How to Deploy
 
 * Update AWS credentials.\
 ```aws configure```
@@ -122,6 +123,10 @@ to reflect your preferred ssh key name.
 After ```terraform apply --auto-approve``` executes, it may be preferable to leave this terminal open to reference the Terraform outputs.
 This will allow convenient copy & paste of the public DNS hostnames to SSH to.
 To re-display the terraform output, in the event the terminal is closed or out of view, run: ```terraform output```
+
+To destroy the entire infrastructure when you're done testing run the following command:\
+```terraform destroy --auto-approve```  
+<br/>
 
 * Configure the EC2 instances via Ansible
 
@@ -156,9 +161,22 @@ To send test syslog packets to the mirror instance, use the following command:\
 Where:\
 --port        indicates port to send to.\
 --msg         sends a random line (message) from random_message.txt\
---src_names   uses a random IP or hostname from random_hosts.txt as the source IP or hostname. (spoofs the source)\
+--src_names   populates the syslog message with a random IP or hostname from random_hosts.txt as the source IP or hostname. (spoofs the source)\</br>The IP's and hostnames from random_hosts.txt match the A/PTR records on the DNS host.
 --count       number of messages to send\
 --host        indicates the host to send to.  In this case send to the mirror host, which will forward the message to syslog-0 and syslog-1
+--sleep       delay in seconds between messages sent. (optional)
+
+### DNS Host
+
+This host replaces the default AWS DNS resolver.  The AWS DNS resolver, by default, is the subnet base first address plus two, in this case 10.0.0.2.  Naturally, all of the mock A/Ptr records could have been added\
+to the AWS DNS Resolver (Route 53 Hosted Zone), however, the intention of this test platform was to emulate an on-premise scenario.  Consquently, unbound is deployed as a DNS resolver, naturally alternatives could\
+be deployed, such as bind or dnsmasq.  One of the test cases was to determine performance of DNS resolution of the Syslog-NG via network DNS resolution vs local. (NB: best practice guidance per Syslog-NG is to\
+resolve DNS locally.)
+
+The five hosts deployed via Terraform are dynamically created as DNS records in unbound.  In addition, as previously mentioned in the client host section, there are a number of mock A/Ptr records registerd to unbound.\
+The DNS records cover the 192.168.0.0/24 address space.  The hostnames are random selection of North American cities.  All of these records and IPs match the IP's/Hostnames from the client host in the file random_hosts.txt.\
+The intention here was to provide a reasonable random number of DNS resolution either by hostname or by IP for the DNS server.  (assuming the unbound server is configured for network DNS resolution; this is roughly where\
+I stopped testing, and will continue at a future date.)
 
 ### Mirror Host
 
