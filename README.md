@@ -6,6 +6,11 @@
    * [Knowledge](#knowledge)
    * [Software](#software)
 * [Terraform Overview](#terraform-overview)
+   * [VPC](#vpc)
+   * [EC2](#ec2)
+   * [Terraform - Ansible inventory & vars](terraform-ansible-inventory-&-vars)
+* [Ansible Overview](#ansible-overview)
+   * [Roles](#roles)
 * [How to Deploy](#how-to-Deploy)
 * [Testing syslog message sending and receiving](#Testing-syslog-message-sending-and-receiving)
    * [Client Host](#client-host)
@@ -13,8 +18,6 @@
    * [Mirror Host](#mirror-host)
    * [Syslog Hosts](#syslog-hosts)
    * [Syslog data flow](#syslog-data-flow)
-* [Ansible Overview](#ansible-overview)
-   * [Roles](#roles)
 * [Security Considerations](#security-considerations)
 * [Improvements](#improvements)
 * [References](#references)
@@ -63,7 +66,7 @@ sandboxes via [acloudguru](https://acloudguru.com/))
 
 ## Terraform Overview
 
-* VPC
+### VPC
 
 A new VPC is created, this deployment does not make use of a default VPC.
 
@@ -74,7 +77,7 @@ An IGW is deployed to the public subnet to enable external access for Ansible/EC
 A NATGW is also deployed to the public subnet, but is not currently utilized.  No assets are created in a private subnet.
 
 
-* EC2
+### EC2
 
 This will deploy five standard RedHat AMI EC2 instances that are publicly accesible via SSH, over default port 22.  A public key SSH
 is pushed to the instances via terraform which will provide relatively secure access.  See below on pushing a SSH
@@ -95,6 +98,37 @@ syslog-1:  second of two syslog-ng servers that receives syslog traffic from the
 However, the ansible deployment will overwrite this default resolution to the DNS server deployed.  All DNS queries will default to
 this instance after ansible is executed.  The intention is to emulate DNS resolution of a on-premise deployment, and not via AWS Route 53.
 
+### Terraform - Ansible inventory & vars
+
+Terraform is configured to generate an Ansible inventory file and variables that are referenced by the Ansible roles.  (see below section\
+regarding Ansible roles)
+
+The Ansible inventory file resides at tf-syslog-ng/ansible/inventory/.
+
+The Ansible var file resides at tf-syslog-ng/ansible/tf_ansible_vars/.
+
+
+## Ansible Overview
+
+### Roles
+
+|Roles applied to all instances    |     |
+|:---------------------------------| --- |
+|boostrap                          |Ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs and/or AWS Region)|
+|env                               |Applies customized setting for BASH PS1, enables larger bash history.|
+|repo-epel                         |Enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
+|packages                          |Installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim|
+|selinux                           |Sets SELinux to permissive.  Not ideal for long term testing.|
+|vim                               |Installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
+|host-config                       |Configures all hosts to resolve DNS by the host "dns".  Adds appropriate Message of The Day(MOTD) banner to each host.
+
+
+|Role specific according<br>to host function |     |
+|:------------------------------------------ | --- |
+|Syslog-NG  |Installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
+|unbound    |Installs unbound.  Add A/ptr records for the EC2 instances by hostname described here. Additionally adds mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
+|client     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)<br> This sets the hostname to client.|
+|mirror     |Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to syslog-0 and syslog-1 hosts.<br>This sets the hostname to mirror.|
 
 ## How to Deploy
 
@@ -210,27 +244,6 @@ To verify the number of logs are symmetric across the syslog servers, line count
 ![Example Data Flow](images/syslog_traffic_path.png)
 
 
-## Ansible Overview
-
-### Roles
-
-|Roles applied to all instances    |     |
-|:---------------------------------| --- |
-|boostrap                          |Ensures Python3 is installed.  By default RH8 does not have Python3 installed.  (your mileage may vary for AMIs and/or AWS Region)|
-|env                               |Applies customized setting for BASH PS1, enables larger bash history.|
-|repo-epel                         |Enables RedHat Extra Packages Repository. (aka [EPEL](https://www.redhat.com/en/blog/whats-epel-and-how-do-i-use-it)]|
-|packages                          |Installs various CLI tools as well as networking tools for diagnosing traffic, netcat,nmap,hping,dig,nslookup,tcpdump,tmux,vim|
-|selinux                           |Sets SELinux to permissive.  Not ideal for long term testing.|
-|vim                               |Installs custom vimrc settings and a few packages.  (recycled from a personal role I use)|
-|host-config                       |Configures all hosts to resolve DNS by the host "dns".  Adds appropriate Message of The Day(MOTD) banner to each host.
-
-
-|Role specific according<br>to host function |     |
-|:------------------------------------------ | --- |
-|Syslog-NG  |Installs and configures Syslog-NG to listen on port 514 (TCP/UDP), enables logging to /var/log/fromnet file.<br>This role sets the hostname accordingly per host.|
-|unbound    |Installs unbound.  Add A/ptr records for the EC2 instances by hostname described here. Additionally adds mock data for A/PTR records for a Class C network to use as lookups. This role sets the hostname to dns.|
-|client     |Clones a git repo to generate mock syslog traffic.  This syslog generator allows for spoofing of hostname or hostname IP,<br>and sending mock messages.  The intention was to stress test both the mirror server as well as Syslog-NG lookups of DNS<br>names from the DNS server.  This role sets the hostname to client.  The git repos for the<br>[Syslog Generator is here](https://github.com/richlamdev/syslog-generator-1)<br> This sets the hostname to client.|
-|mirror     |Configures the server to as as a traffic splitter of syslog traffic.  Forwards incoming data received on port 514 to syslog-0 and syslog-1 hosts.<br>This sets the hostname to mirror.|
 
 
 ## Security Considerations
