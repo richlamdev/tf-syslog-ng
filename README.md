@@ -57,12 +57,15 @@ This will be helpful for potential changes to this project or to adopt to other 
 
 * [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-* [Terraform](https://www.terraform.io/downloads)
-
 * AWS account.  It is possible some charges will be incurred with this test environment.
 I am not aware of potential costs, due to using short-term AWS test environments (aka temporary
-sandboxes via [acloudguru](https://acloudguru.com/))
+sandboxes via [acloudguru](https://acloudguru.com/)
 
+* Update your AWS credentials via ~/.aws/credentials, note main.tf indicates the default profile of cloud_user, change as necessary
+
+* [Terraform](https://www.terraform.io/downloads)
+
+* [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
 ## Terraform Overview
 

@@ -1,5 +1,6 @@
 provider "aws" {
   region = var.aws_region
+  profile = "cloud_user"
 }
 
 ########################### NEW VPC ##############################

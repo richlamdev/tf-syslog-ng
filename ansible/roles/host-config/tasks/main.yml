@@ -29,6 +29,8 @@
     enabled: True
     state: reloaded
 
+- name: ensure proper hostname reporting, by forcing setup module (gather_facts)
+  setup:
 
 - name: Get the instance identity document
   uri:
