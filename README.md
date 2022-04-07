@@ -8,11 +8,11 @@
 * [Terraform Overview](#terraform-overview)
    * [VPC](#vpc)
    * [EC2](#ec2)
-   * [Terraform - Ansible inventory & vars](terraform-ansible-inventory-&-vars)
+   * [Terraform export to Ansible](#terraform-export-to-ansible)
 * [Ansible Overview](#ansible-overview)
    * [Roles](#roles)
 * [How to Deploy](#how-to-Deploy)
-* [Testing syslog message sending and receiving](#Testing-syslog-message-sending-and-receiving)
+* [Testing syslog message sending and receiving](#testing-syslog-message-sending-and-receiving)
    * [Client Host](#client-host)
    * [DNS Host](#dns-host)
    * [Mirror Host](#mirror-host)
@@ -98,7 +98,7 @@ syslog-1:  second of two syslog-ng servers that receives syslog traffic from the
 However, the ansible deployment will overwrite this default resolution to the DNS server deployed.  All DNS queries will default to
 this instance after ansible is executed.  The intention is to emulate DNS resolution of a on-premise deployment, and not via AWS Route 53.
 
-### Terraform - Ansible inventory & vars
+### Terraform export to Ansible
 
 Terraform is configured to generate an Ansible inventory file and variables that are referenced by the Ansible roles.  (see below section\
 regarding Ansible roles)
