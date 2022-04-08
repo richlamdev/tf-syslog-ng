@@ -15,13 +15,14 @@
 * [Testing syslog message sending and receiving](#testing-syslog-message-sending-and-receiving)
    * [Client Host](#client-host)
    * [DNS Host](#dns-host)
+     * [AWS Default DNS Server](#aws-default-dns-server)
+     * [Unbound DNS Server](#unbound-dns-server)
    * [Mirror Host](#mirror-host)
    * [Syslog Hosts](#syslog-hosts)
    * [Syslog data flow](#syslog-data-flow)
 * [Security Considerations](#security-considerations)
 * [Improvements](#improvements)
 * [References](#references)
-
 
 ## Introduction
 
@@ -203,17 +204,30 @@ Where:\
 --host        indicates the host to send to.  In this case send to the mirror host, which will forward the message to syslog-0 and syslog-1
 --sleep       delay in seconds between messages sent. (optional)
 
+For a closer look at the syslog-generator-1 code/repository is [here](https://github.com/richlamdev/syslog-generator-1).
+
 ### DNS Host
 
-This host replaces the default AWS DNS resolver.  The AWS DNS resolver, by default, is the subnet base first address plus two, in this case 10.0.0.2.  Naturally, all of the mock A/Ptr records could have been added\
-to the AWS DNS Resolver (Route 53 Hosted Zone), however, the intention of this test platform was to emulate an on-premise scenario.  Consquently, unbound is deployed as a DNS resolver, naturally alternatives could\
-be deployed, such as bind or dnsmasq.  One of the test cases was to determine performance of DNS resolution of the Syslog-NG via network DNS resolution vs local. (NB: best practice guidance per Syslog-NG is to\
-resolve DNS locally.)
+#### AWS Default DNS Server
 
-The five hosts deployed via Terraform are dynamically created as DNS records in unbound.  In addition, as previously mentioned in the client host section, there are a number of mock A/Ptr records registerd to unbound.\
-The DNS records cover the 192.168.0.0/24 address space.  The hostnames are random selection of North American cities.  All of these records and IPs match the IP's/Hostnames from the client host in the file random_hosts.txt.\
-The intention here was to provide a reasonable random number of DNS resolution either by hostname or by IP for the DNS server.  (assuming the unbound server is configured for network DNS resolution; this is roughly where\
-I stopped testing, and will continue at a future date.)
+The AWS DNS resolver, by default is enabled and used by the EC2 instances at provisioning.  The IP for the DNS resolver is the subnet base address plus two, in this case 10.0.0.2.
+The AWS DNS resolver is removed as the default resolver after Ansible executes.  The intention is simulate an on-premise environmet.
+
+#### Unbound DNS Server
+
+Unbound is an open-source DNS resolver. More information about Unbound can be found [here](https://www.nlnetlabs.nl/projects/unbound/about/)
+
+A mock domain name, tatooine.test, is the associated domain name for this test environment.  This domain name is registered on Unbound DNS.  The five EC2 hosts deployed via Terraform are also created, dynamically, as A/Ptr records in unbound.
+(in other words, you can perform an nslookup from any of the five hosts to by hostname or IP, and it will be resolved by unbound)
+
+Mock A/Ptr records are also created within Unbound.  The A/Ptr records are random North American city names.  These DNS records cover the 192.168.0.0/24 address space. 
+All of these records and IPs match the IP's/Hostnames from the client host in the file random_hosts.txt.
+
+The intention is to provide a reasonable random number of DNS lookups, either by hostname, or by IP from the DNS server.  (assuming the unbound server is configured for network DNS resolution; 
+testing has temporarily suspended at this point, further testing to be continued at a future date.)
+
+One of the intentions of this test environment was to determine performance of DNS resolution of Syslog-NG via network DNS vs local resolution. It should be noted best practice guidance per 
+[Syslog-NG is to resolve DNS locally](https://www.syslog-ng.com/technical-documents/doc/syslog-ng-open-source-edition/3.16/administration-guide/85)
 
 ### Mirror Host
 
@@ -245,8 +259,6 @@ To verify the number of logs are symmetric across the syslog servers, line count
 * In this example, the red rectangle indicates last message sent from the client, received from the mirror host, and then received and logged on the syslog-ng servers.
 
 ![Example Data Flow](images/syslog_traffic_path.png)
-
-
 
 
 ## Security Considerations
