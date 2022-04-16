@@ -9,9 +9,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "richy-vpc"
-    #Environment = var.infra_env
-    ManagedBy = "terraform"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 ########################### NEW VPC ##############################
@@ -29,7 +27,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name      = "10.0.1.0 - Public Subnet"
-    ManagedBy = "terraform"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
@@ -44,64 +42,66 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name      = "10.0.2.0 - Private Subnet"
-    ManagedBy = "terraform"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 ########################### SUBNETS ##############################
 
 ########################### INTERNET GATWAY ######################
-resource "aws_internet_gateway" "richy-igw" {
+resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
   tags = {
-    Name = "richy-igw"
+    Name = "igw"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
 # create route table and attach to Internet Gateway
-resource "aws_route_table" "public_rt" {
+resource "aws_route_table" "public" {
   vpc_id = aws_vpc.vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.richy-igw.id
+    gateway_id = aws_internet_gateway.igw.id
   }
   tags = {
     Name = "public_route_table"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
 # associate designated subnet to public route table
 resource "aws_route_table_association" "internet_gateway_association" {
   subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public_rt.id
+  route_table_id = aws_route_table.public.id
 }
 ########################### INTERNET GATWAY ######################
 
 ########################### NAT GATWAY ###########################
-resource "aws_eip" "nat_gateway" {
+resource "aws_eip" "ngw" {
   vpc = true
 }
 
 # create nat gateway
-resource "aws_nat_gateway" "nat_gateway" {
-  allocation_id = aws_eip.nat_gateway.id
+resource "aws_nat_gateway" "ngw" {
+  allocation_id = aws_eip.ngw.id
   subnet_id     = aws_subnet.public.id
 
   tags = {
-    Name = "nat_gateway"
+    CreatedBy = "tf-syslog-ng"
   }
-  # To ensure proper ordering, it is recommended to add an explicit dependency
-  # on the Internet Gateway for the VPC.
-  depends_on = [aws_internet_gateway.richy-igw]
+  # ensure proper ordering; add an explicit dependency on the IGW for the VPC
+  depends_on = [aws_internet_gateway.igw]
 }
 
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat_gateway.id
+    gateway_id = aws_nat_gateway.ngw.id
   }
   tags = {
     Name = "private_route_table"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
@@ -113,7 +113,7 @@ resource "aws_route_table_association" "nat_gateway_association" {
 ########################### NAT GATWAY ###########################
 
 ########################### SECURITY GROUPS ######################
-resource "aws_security_group" "sg_public" {
+resource "aws_security_group" "public" {
   name        = "sg_public_ssh"
   description = "allow SSH from internet"
   vpc_id      = aws_vpc.vpc.id
@@ -131,6 +131,7 @@ resource "aws_security_group" "sg_public" {
   }
   tags = {
     Name = "public_sg_ssh_only"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
@@ -153,11 +154,12 @@ resource "aws_security_group" "sg_private" {
   }
   tags = {
     Name = "private_sg_ssh_only_from_public_subnet"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
 
-resource "aws_security_group" "sg_icmp" {
+resource "aws_security_group" "icmp" {
   name        = "sg_icmp"
   description = "allow icmp from public or private subnet"
   vpc_id      = aws_vpc.vpc.id
@@ -175,11 +177,12 @@ resource "aws_security_group" "sg_icmp" {
   }
   tags = {
     Name = "private_sg_icmp_from_public_or_private_subnet"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
 
-resource "aws_security_group" "allow_syslog_ng" {
+resource "aws_security_group" "syslog_ng" {
   name        = "allow_syslog_ng"
   description = "allow syslog-ng UDP 514 ingress from public or private subnet"
   vpc_id      = aws_vpc.vpc.id
@@ -197,11 +200,12 @@ resource "aws_security_group" "allow_syslog_ng" {
   }
   tags = {
     Name = "allow_syslog_ng_from_public_or_private_subnet"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
 
-resource "aws_security_group" "allow_dns" {
+resource "aws_security_group" "dns" {
   name        = "allow_dns"
   description = "allow dns UDP 53 ingress from public or private subnet"
   vpc_id      = aws_vpc.vpc.id
@@ -219,25 +223,27 @@ resource "aws_security_group" "allow_dns" {
   }
   tags = {
     Name = "allow_dns_from_public_or_private_subnet"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 ########################### SECURITY GROUPS ######################
 
 ########################### DHCP OPTIONS #########################
-resource "aws_vpc_dhcp_options" "vpc_dhcp_options" {
+resource "aws_vpc_dhcp_options" "config" {
   domain_name = "tatooine.test"
   #domain_name_servers = ["127.0.0.1", "10.0.0.2"]
-  #domain_name_servers = ["AmazonProvidedDNS", "${aws_instance.public_test_instance[2].private_ip}" ]
+  #domain_name_servers = ["AmazonProvidedDNS", "${aws_instance.public_test[2].private_ip}" ]
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = {
-    Name = "richy's vpc_dhcp_options"
+    Name = "VPC DCHP Options"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
-resource "aws_vpc_dhcp_options_association" "richy_dns_resolver" {
+resource "aws_vpc_dhcp_options_association" "dns_resolver" {
   vpc_id          = aws_vpc.vpc.id
-  dhcp_options_id = aws_vpc_dhcp_options.vpc_dhcp_options.id
+  dhcp_options_id = aws_vpc_dhcp_options.config.id
 }
 
 resource "aws_route53_zone" "private" {
@@ -248,10 +254,6 @@ resource "aws_route53_zone" "private" {
   }
 }
 
-#variable "tatooine_A_records" {
-#  default = ["syslog-0", "syslog-1", "dns", "client", "mirror"]
-#}
-
 locals {
   host_names = {
     namea = "syslog-0.tatooine.test"
@@ -261,11 +263,11 @@ locals {
     namee = "mirror.tatooine.test"
   }
   deploy_names = {
-    deploya = aws_instance.public_test_instance[0]
-    deployb = aws_instance.public_test_instance[1]
-    deployc = aws_instance.public_test_instance[2]
-    deployd = aws_instance.public_test_instance[3]
-    deploye = aws_instance.public_test_instance[4]
+    deploya = aws_instance.public_test[0]
+    deployb = aws_instance.public_test[1]
+    deployc = aws_instance.public_test[2]
+    deployd = aws_instance.public_test[3]
+    deploye = aws_instance.public_test[4]
   }
   host_deploy_names = zipmap(values(local.host_names), values(local.deploy_names))
 }
@@ -280,40 +282,7 @@ resource "aws_route53_record" "domain_records" {
   records         = [each.value.private_ip]
 }
 
-#resource "aws_route53_record" "syslog1" {
-#zone_id = aws_route53_zone.private.zone_id
-#name    = "syslog-1"
-#type    = "A"
-#ttl     = "300"
-#records = [aws_instance.public_test_instance[1].private_ip]
-#}
-#
-#resource "aws_route53_record" "dns" {
-#zone_id = aws_route53_zone.private.zone_id
-#name    = "dns"
-#type    = "A"
-#ttl     = "300"
-#records = [aws_instance.public_test_instance[2].private_ip]
-#}
-#
-#resource "aws_route53_record" "client" {
-#zone_id = aws_route53_zone.private.zone_id
-#name    = "client"
-#type    = "A"
-#ttl     = "300"
-#records = [aws_instance.public_test_instance[3].private_ip]
-#}
-#
-#resource "aws_route53_record" "mirror" {
-#zone_id = aws_route53_zone.private.zone_id
-#name    = "mirror"
-#type    = "A"
-#ttl     = "300"
-#records = [aws_instance.public_test_instance[4].private_ip]
-#}
-
 ########################### DHCP OPTIONS #########################
-
 
 ########################### EC2 INSTANCES ########################
 resource "aws_key_pair" "ssh-key" {
@@ -337,21 +306,22 @@ data "aws_ami" "latest-Redhat" {
 }
 
 # public instance
-resource "aws_instance" "public_test_instance" {
+resource "aws_instance" "public_test" {
   count           = 5
   ami             = "${data.aws_ami.latest-Redhat.id}" # Get latest RH 8.5x image
   subnet_id       = aws_subnet.public.id
-  security_groups = [aws_security_group.sg_public.id, aws_security_group.sg_icmp.id, aws_security_group.allow_syslog_ng.id, aws_security_group.allow_dns.id]
+  security_groups = [aws_security_group.public.id, aws_security_group.icmp.id, aws_security_group.syslog_ng.id, aws_security_group.dns.id]
   instance_type   = "t3.micro"
   #iam_instance_profile = "EC2SSMRole"
   key_name = "ssh-key"
   tags = {
     Name = "public-instance-test"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
 # private instance
-#resource "aws_instance" "private_test_instance" {
+#resource "aws_instance" "private_test" {
 #ami             = "ami-0b28dfc7adc325ef4"
 #subnet_id       = aws_subnet.private.id
 #security_groups = [aws_security_group.sg_private.id, aws_security_group.sg_icmp.id]
@@ -365,60 +335,3 @@ resource "aws_instance" "public_test_instance" {
 #}
 
 ########################### EC2 INSTANCES ########################
-
-########################### OUTPUT INVENTORY FOR ANSIBLE #########
-#resource "local_file" "inventory" {
-#filename = "./inventory"
-#content  = <<EOF
-#[syslogng]
-#${aws_instance.public_test_instance[0].public_dns}
-#${aws_instance.public_test_instance[1].public_dns}
-#
-#[dns]
-#${aws_instance.public_test_instance[2].public_dns}
-#
-#[client]
-#${aws_instance.public_test_instance[3].public_dns}
-#
-#[mirror]
-#${aws_instance.public_test_instance[4].public_dns}
-#
-#[multi:children]
-#syslogng
-#dns
-#client
-#
-#[multi:vars]
-#ansible_become=True
-#ansible_become_method=sudo
-#ansible_become_user=root
-#ansible_python_interpreter=/usr/bin/python3
-#EOF
-#}
-############################ OUTPUT INVENTORY FOR ANSIBLE #########
-#
-############################ HOSTS FILE FOR EACH INSTANCE #########
-#
-#locals {
-#hosts_append = <<-EOT
-#local-data: "syslog-0.tatooine.test.         IN        A      ${aws_instance.public_test_instance[0].private_ip}"
-#local-data: "syslog-1.tatooine.test.         IN        A      ${aws_instance.public_test_instance[1].private_ip}"
-#local-data: "dns.tatooine.test.              IN        A      ${aws_instance.public_test_instance[2].private_ip}"
-#local-data: "client.tatooine.test.           IN        A      ${aws_instance.public_test_instance[3].private_ip}"
-#local-data: "mirror.tatooine.test.           IN        A      ${aws_instance.public_test_instance[4].private_ip}"
-#
-#local-data-ptr: "${aws_instance.public_test_instance[0].private_ip}            syslog-0.tatooine.test."
-#local-data-ptr: "${aws_instance.public_test_instance[1].private_ip}            syslog-1.tatooine.test."
-#local-data-ptr: "${aws_instance.public_test_instance[2].private_ip}            dns.tatooine.test."
-#local-data-ptr: "${aws_instance.public_test_instance[3].private_ip}            client.tatooine.test."
-#local-data-ptr: "${aws_instance.public_test_instance[4].private_ip}            mirror.tatooine.test."
-#EOT
-#}
-#
-#resource "local_file" "hosts_append" {
-#filename = "./dnshosts/hosts_append"
-#content  = local.hosts_append
-#}
-#
-#
-#
