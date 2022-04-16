@@ -70,7 +70,7 @@ resource "aws_route_table" "public" {
 }
 
 # associate designated subnet to public route table
-resource "aws_route_table_association" "internet_gateway_association" {
+resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
 }
@@ -86,14 +86,15 @@ resource "aws_nat_gateway" "ngw" {
   allocation_id = aws_eip.ngw.id
   subnet_id     = aws_subnet.public.id
 
+  # ensure proper ordering; add an explicit dependency on the IGW for the VPC
+  depends_on = [aws_internet_gateway.igw]
+
   tags = {
     CreatedBy = "tf-syslog-ng"
   }
-  # ensure proper ordering; add an explicit dependency on the IGW for the VPC
-  depends_on = [aws_internet_gateway.igw]
 }
 
-resource "aws_route_table" "private_rt" {
+resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vpc.id
   route {
     cidr_block = "0.0.0.0/0"
@@ -106,14 +107,14 @@ resource "aws_route_table" "private_rt" {
 }
 
 # associate private subnet with private route table
-resource "aws_route_table_association" "nat_gateway_association" {
+resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private.id
-  route_table_id = aws_route_table.private_rt.id
+  route_table_id = aws_route_table.private.id
 }
 ########################### NAT GATWAY ###########################
 
 ########################### SECURITY GROUPS ######################
-resource "aws_security_group" "public" {
+resource "aws_security_group" "public_ssh" {
   name        = "sg_public_ssh"
   description = "allow SSH from internet"
   vpc_id      = aws_vpc.vpc.id
@@ -136,7 +137,7 @@ resource "aws_security_group" "public" {
 }
 
 
-resource "aws_security_group" "sg_private" {
+resource "aws_security_group" "private_ssh" {
   name        = "sg_private_ssh"
   description = "allow SSH from public subnet"
   vpc_id      = aws_vpc.vpc.id
@@ -285,8 +286,8 @@ resource "aws_route53_record" "domain_records" {
 ########################### DHCP OPTIONS #########################
 
 ########################### EC2 INSTANCES ########################
-resource "aws_key_pair" "ssh-key" {
-  key_name   = "ssh-key"
+resource "aws_key_pair" "ssh" {
+  key_name   = "ssh_key_pair"
   public_key = file(pathexpand("~/.ssh/id_ed25519_tf_acg.pub"))
 }
 
@@ -310,10 +311,10 @@ resource "aws_instance" "public_test" {
   count           = 5
   ami             = "${data.aws_ami.latest-Redhat.id}" # Get latest RH 8.5x image
   subnet_id       = aws_subnet.public.id
-  security_groups = [aws_security_group.public.id, aws_security_group.icmp.id, aws_security_group.syslog_ng.id, aws_security_group.dns.id]
+  security_groups = [aws_security_group.public_ssh.id, aws_security_group.icmp.id, aws_security_group.syslog_ng.id, aws_security_group.dns.id]
   instance_type   = "t3.micro"
   #iam_instance_profile = "EC2SSMRole"
-  key_name = "ssh-key"
+  key_name = "ssh_key_pair"
   tags = {
     Name = "public-instance-test"
     CreatedBy = "tf-syslog-ng"
@@ -324,13 +325,14 @@ resource "aws_instance" "public_test" {
 #resource "aws_instance" "private_test" {
 #ami             = "ami-0b28dfc7adc325ef4"
 #subnet_id       = aws_subnet.private.id
-#security_groups = [aws_security_group.sg_private.id, aws_security_group.sg_icmp.id]
+#security_groups = [aws_security_group.private_ssh.id, aws_security_group.icmp.id]
 #instance_type   = "t3.micro"
 #count           = 1
 #iam_instance_profile = "EC2SSMRole"
-#key_name             = "ssh-key"
+#key_name             = "ssh"
 #tags = {
 #Name = "private-instance-test"
+    #CreatedBy = "tf-syslog-ng"
 #}
 #}
 
