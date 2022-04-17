@@ -263,12 +263,14 @@ To verify the number of logs are symmetric across the syslog servers, line count
 
 ## Security Considerations
 
-* As mentioned, NACLs are not used/applied.  Naturally, and added layer of defense would be to enable NACLs as required.
+* As mentioned, NACLs are not used/applied.  Naturally, an added layer of defense would be to enable NACLs as required.
 * SELinux is effectively disabled.  SELinux should be enabled.
 * Remove the script from the root directory on the syslog hosts.
 * Host based firewall should be enabled.
-* Potentially remove public access to all instance by using AWS SSM.
+* Potentially remove public access to all instance by using AWS SSM, or setup a VPN to access the hosts. (AWS Client VPN or alternative)
   * Another alternative would be to use a bastion host, then access a private subnet.
+  * If an alternative method is implented to access the infrastructure, consequently a new method to deploy Ansible would have to be determined.
+
 
 ## Improvements
 
