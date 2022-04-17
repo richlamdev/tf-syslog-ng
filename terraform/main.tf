@@ -4,10 +4,9 @@ provider "aws" {
 }
 
 ########################### NEW VPC ##############################
-resource "aws_vpc" "vpc" {
+resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
-
   tags = {
     CreatedBy = "tf-syslog-ng"
   }
@@ -16,30 +15,26 @@ resource "aws_vpc" "vpc" {
 
 ########################### SUBNETS ##############################
 
-# public subnet
 resource "aws_subnet" "public" {
-  vpc_id                  = aws_vpc.vpc.id
+  vpc_id                  = aws_vpc.main.id
   map_public_ip_on_launch = true
 
   # 251 IP addresses each
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-west-2a"
-
   tags = {
     Name      = "10.0.1.0 - Public Subnet"
     CreatedBy = "tf-syslog-ng"
   }
 }
 
-# private subnet
 resource "aws_subnet" "private" {
-  vpc_id                  = aws_vpc.vpc.id
+  vpc_id                  = aws_vpc.main.id
   map_public_ip_on_launch = false
 
   # 251 IP addresses each
   cidr_block        = "10.0.2.0/24"
   availability_zone = "us-west-2a"
-
   tags = {
     Name      = "10.0.2.0 - Private Subnet"
     CreatedBy = "tf-syslog-ng"
@@ -49,7 +44,7 @@ resource "aws_subnet" "private" {
 
 ########################### INTERNET GATWAY ######################
 resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = aws_vpc.main.id
   tags = {
     Name = "igw"
     CreatedBy = "tf-syslog-ng"
@@ -58,7 +53,7 @@ resource "aws_internet_gateway" "igw" {
 
 # create route table and attach to Internet Gateway
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = aws_vpc.main.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
@@ -81,21 +76,19 @@ resource "aws_eip" "ngw" {
   vpc = true
 }
 
-# create nat gateway
 resource "aws_nat_gateway" "ngw" {
   allocation_id = aws_eip.ngw.id
   subnet_id     = aws_subnet.public.id
 
   # ensure proper ordering; add an explicit dependency on the IGW for the VPC
   depends_on = [aws_internet_gateway.igw]
-
   tags = {
     CreatedBy = "tf-syslog-ng"
   }
 }
 
 resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = aws_vpc.main.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.ngw.id
@@ -117,7 +110,7 @@ resource "aws_route_table_association" "private" {
 resource "aws_security_group" "public_ssh" {
   name        = "sg_public_ssh"
   description = "allow SSH from internet"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = aws_vpc.main.id
   ingress {
     from_port   = 22
     to_port     = 22
@@ -136,11 +129,10 @@ resource "aws_security_group" "public_ssh" {
   }
 }
 
-
 resource "aws_security_group" "private_ssh" {
   name        = "sg_private_ssh"
   description = "allow SSH from public subnet"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = aws_vpc.main.id
   ingress {
     from_port   = 22
     to_port     = 22
@@ -159,11 +151,10 @@ resource "aws_security_group" "private_ssh" {
   }
 }
 
-
 resource "aws_security_group" "icmp" {
   name        = "sg_icmp"
   description = "allow icmp from public or private subnet"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = aws_vpc.main.id
   ingress {
     from_port   = -1
     to_port     = -1
@@ -186,7 +177,7 @@ resource "aws_security_group" "icmp" {
 resource "aws_security_group" "syslog_ng" {
   name        = "allow_syslog_ng"
   description = "allow syslog-ng UDP 514 ingress from public or private subnet"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = aws_vpc.main.id
   ingress {
     from_port   = 514
     to_port     = 514
@@ -205,11 +196,10 @@ resource "aws_security_group" "syslog_ng" {
   }
 }
 
-
 resource "aws_security_group" "dns" {
   name        = "allow_dns"
   description = "allow dns UDP 53 ingress from public or private subnet"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = aws_vpc.main.id
   ingress {
     from_port   = 53
     to_port     = 53
@@ -235,7 +225,6 @@ resource "aws_vpc_dhcp_options" "config" {
   #domain_name_servers = ["127.0.0.1", "10.0.0.2"]
   #domain_name_servers = ["AmazonProvidedDNS", "${aws_instance.public_test[2].private_ip}" ]
   domain_name_servers = ["AmazonProvidedDNS"]
-
   tags = {
     Name = "VPC DCHP Options"
     CreatedBy = "tf-syslog-ng"
@@ -243,7 +232,7 @@ resource "aws_vpc_dhcp_options" "config" {
 }
 
 resource "aws_vpc_dhcp_options_association" "dns_resolver" {
-  vpc_id          = aws_vpc.vpc.id
+  vpc_id          = aws_vpc.main.id
   dhcp_options_id = aws_vpc_dhcp_options.config.id
 }
 
@@ -251,7 +240,11 @@ resource "aws_route53_zone" "private" {
   name = "tatooine.test"
 
   vpc {
-    vpc_id = aws_vpc.vpc.id
+    vpc_id = aws_vpc.main.id
+  }
+  tags = {
+    Name = "aws_vpc_dhcp_options_association"
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
@@ -282,13 +275,16 @@ resource "aws_route53_record" "domain_records" {
   ttl             = "300"
   records         = [each.value.private_ip]
 }
-
 ########################### DHCP OPTIONS #########################
 
 ########################### EC2 INSTANCES ########################
 resource "aws_key_pair" "ssh" {
   key_name   = "ssh_key_pair"
   public_key = file(pathexpand("~/.ssh/id_ed25519_tf_acg.pub"))
+  tags = {
+    Name = "ssh_key_pair"
+    CreatedBy = "tf-syslog-ng"
+  }
 }
 
 data "aws_ami" "latest-Redhat" {
@@ -303,6 +299,9 @@ data "aws_ami" "latest-Redhat" {
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
+  }
+  tags = {
+    CreatedBy = "tf-syslog-ng"
   }
 }
 
@@ -335,5 +334,4 @@ resource "aws_instance" "public_test" {
     #CreatedBy = "tf-syslog-ng"
 #}
 #}
-
 ########################### EC2 INSTANCES ########################
