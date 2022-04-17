@@ -1,15 +1,8 @@
-provider "aws" {
-  region = var.aws_region
-  profile = "cloud_user"
-}
-
 ########################### NEW VPC ##############################
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
-  tags = {
-    CreatedBy = "tf-syslog-ng"
-  }
+  tags                 = var.default_tags
 }
 ########################### NEW VPC ##############################
 
@@ -22,10 +15,10 @@ resource "aws_subnet" "public" {
   # 251 IP addresses each
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-west-2a"
-  tags = {
-    Name      = "10.0.1.0 - Public Subnet"
-    CreatedBy = "tf-syslog-ng"
-  }
+  tags = merge(var.default_tags, {
+    Name = "10.0.1.0 - Public Subnet"
+    },
+  )
 }
 
 resource "aws_subnet" "private" {
@@ -35,20 +28,21 @@ resource "aws_subnet" "private" {
   # 251 IP addresses each
   cidr_block        = "10.0.2.0/24"
   availability_zone = "us-west-2a"
-  tags = {
-    Name      = "10.0.2.0 - Private Subnet"
-    CreatedBy = "tf-syslog-ng"
-  }
+  tags = merge(var.default_tags, {
+    Name = "10.0.2.0 - Private Subnet"
+    },
+  )
 }
 ########################### SUBNETS ##############################
 
 ########################### INTERNET GATWAY ######################
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
-  tags = {
-    Name = "igw"
+  tags = merge(var.default_tags, {
+    Name      = "igw"
     CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 # create route table and attach to Internet Gateway
@@ -58,10 +52,10 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "public_route_table"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 # associate designated subnet to public route table
@@ -82,9 +76,7 @@ resource "aws_nat_gateway" "ngw" {
 
   # ensure proper ordering; add an explicit dependency on the IGW for the VPC
   depends_on = [aws_internet_gateway.igw]
-  tags = {
-    CreatedBy = "tf-syslog-ng"
-  }
+  tags       = var.default_tags
 }
 
 resource "aws_route_table" "private" {
@@ -93,10 +85,10 @@ resource "aws_route_table" "private" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.ngw.id
   }
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "private_route_table"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 # associate private subnet with private route table
@@ -123,10 +115,10 @@ resource "aws_security_group" "public_ssh" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "public_sg_ssh_only"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 resource "aws_security_group" "private_ssh" {
@@ -145,10 +137,10 @@ resource "aws_security_group" "private_ssh" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "private_sg_ssh_only_from_public_subnet"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 resource "aws_security_group" "icmp" {
@@ -167,10 +159,10 @@ resource "aws_security_group" "icmp" {
     protocol    = "icmp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "private_sg_icmp_from_public_or_private_subnet"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 
@@ -190,10 +182,10 @@ resource "aws_security_group" "syslog_ng" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "allow_syslog_ng_from_public_or_private_subnet"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 resource "aws_security_group" "dns" {
@@ -212,10 +204,10 @@ resource "aws_security_group" "dns" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "allow_dns_from_public_or_private_subnet"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 ########################### SECURITY GROUPS ######################
 
@@ -225,10 +217,10 @@ resource "aws_vpc_dhcp_options" "config" {
   #domain_name_servers = ["127.0.0.1", "10.0.0.2"]
   #domain_name_servers = ["AmazonProvidedDNS", "${aws_instance.public_test[2].private_ip}" ]
   domain_name_servers = ["AmazonProvidedDNS"]
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "VPC DCHP Options"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 resource "aws_vpc_dhcp_options_association" "dns_resolver" {
@@ -242,10 +234,10 @@ resource "aws_route53_zone" "private" {
   vpc {
     vpc_id = aws_vpc.main.id
   }
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "aws_vpc_dhcp_options_association"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 locals {
@@ -281,10 +273,10 @@ resource "aws_route53_record" "domain_records" {
 resource "aws_key_pair" "ssh" {
   key_name   = "ssh_key_pair"
   public_key = file(pathexpand("~/.ssh/id_ed25519_tf_acg.pub"))
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "ssh_key_pair"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 data "aws_ami" "latest-Redhat" {
@@ -300,24 +292,22 @@ data "aws_ami" "latest-Redhat" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-  tags = {
-    CreatedBy = "tf-syslog-ng"
-  }
+  tags = var.default_tags
 }
 
 # public instance
 resource "aws_instance" "public_test" {
   count           = 5
-  ami             = "${data.aws_ami.latest-Redhat.id}" # Get latest RH 8.5x image
+  ami             = data.aws_ami.latest-Redhat.id # Get latest RH 8.5x image
   subnet_id       = aws_subnet.public.id
   security_groups = [aws_security_group.public_ssh.id, aws_security_group.icmp.id, aws_security_group.syslog_ng.id, aws_security_group.dns.id]
   instance_type   = "t3.micro"
   #iam_instance_profile = "EC2SSMRole"
   key_name = "ssh_key_pair"
-  tags = {
+  tags = merge(var.default_tags, {
     Name = "public-instance-test"
-    CreatedBy = "tf-syslog-ng"
-  }
+    },
+  )
 }
 
 # private instance
@@ -331,7 +321,7 @@ resource "aws_instance" "public_test" {
 #key_name             = "ssh"
 #tags = {
 #Name = "private-instance-test"
-    #CreatedBy = "tf-syslog-ng"
+#CreatedBy = "tf-syslog-ng"
 #}
 #}
 ########################### EC2 INSTANCES ########################
