@@ -273,7 +273,6 @@ To verify the number of logs are symmetric across the syslog servers, line count
 ## Improvements
 
 * clean up Terraform, specifically use more variables and reduce violation of DRY principle.
-  * rename tag names, many have nonsensical tag names.
 * remove hard coded AMI reference; create an automatic lookup for most recent Redhat AMI.
   * update this has been implemented, but further testing should be done to ensure robustness, in event the AMI changes.
 * invoke Ansible automatically afer Terraform has completed.
